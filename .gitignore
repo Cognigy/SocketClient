@@ -12,4 +12,4 @@ Thumbs.db
 # ignore js and d.t.s files
 *.js
 *.js.map
-*.d.t.s
+*.d.ts
