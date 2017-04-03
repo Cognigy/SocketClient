@@ -1,0 +1,15 @@
+# ignore project files
+.idea/
+
+# ignore npm files
+node_modules/
+npm-debug.log*
+
+# os generated files
+Thumbs.db
+.DS_Store
+
+# ignore js and d.t.s files
+*.js
+*.js.map
+*.d.t.s

@@ -1,0 +1,14 @@
+# ignore project files
+.idea/
+
+# ignore npm files
+node_modules/
+npm-debug.log*
+
+# os generated files
+Thumbs.db
+.DS_Store
+
+# do not publish ts files to npm
+*.ts
+!*.d.ts
