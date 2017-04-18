@@ -10,6 +10,7 @@ export interface Options {
     version?: number;
     reconnection?: boolean;
     interval?: number;
+    resetState?: boolean;
     handleError?: (error: CognigyError) => void;
     handleException?: (error: CognigyError) => void;
     handleOutput?: (output: Output) => void;
