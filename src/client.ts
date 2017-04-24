@@ -119,6 +119,16 @@ export class CognigyClient {
     }
 
     /**
+     * Convenience method to send a "resetContext" event.
+     */
+    public resetContext(): void {
+        if (this.isConnected())
+            this.mySocket.emit("resetContext");
+        else
+            throw new Error("Error sending resetContext event - we are not connected");
+    }
+
+    /**
      * Sends a message to the brain-server.
      */
     public sendMessage(text: string, data: any): void {
@@ -135,7 +145,10 @@ export class CognigyClient {
      * Directly registers event listener on the raw socket.io socket.
      */
     public on(event: string, handler: any): void {
-        this.mySocket.on(event, handler);
+        if (this.isConnected())
+            this.mySocket.on(event, handler);
+        else
+            throw new Error("Error within on - we are not connected");
     }
 
     /**
@@ -143,7 +156,10 @@ export class CognigyClient {
      * socket.io connection.
      */
     public sendEvent(event: string, data: any): void {
-        this.mySocket.emit(event, data);
+        if (this.isConnected())
+            this.mySocket.emit(event, data);
+        else
+            throw new Error("Error in sendEvent - we are not connected");
     }
 
     /**
@@ -179,6 +195,14 @@ export class CognigyClient {
             this.options.handleOutput ? this.options.handleOutput(output) : console.log("Text: " + output.text + " Data: " + output.data);
         });
 
+        this.mySocket.on("resetState", (data: any) => {
+            this.options.handleResetState ? this.options.handleResetState(data) : console.log("Successfully reset state: " + data);
+        });
+
+        this.mySocket.on("resetContext", (data: any) => {
+            this.options.handleResetContext ? this.options.handleResetContext(data) : console.log("Successfully reset context: " + data);
+        })
+
         this.mySocket.on("logStep", (output: Output) => {
             this.options.handleLogstep ? this.options.handleLogstep(output) : null;
         });
@@ -207,7 +231,7 @@ export class CognigyClient {
             this.mySocket.on("connect_timeout", () => {
                 reject(new Error("Error connecting"));
             });
-        })
+        });
     }
 
     private getToken(baseUrl: string, user: string, apikey: string, token?: string): Promise<any> {

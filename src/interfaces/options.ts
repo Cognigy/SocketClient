@@ -14,6 +14,8 @@ export interface Options {
     handleError?: (error: CognigyError) => void;
     handleException?: (error: CognigyError) => void;
     handleOutput?: (output: Output) => void;
+    handleResetState?: (data: any) => void,
+    handleResetContext?: (data: any) => void,
     handleLogstep?: (output: Output) => void;
     handleLogstepError?: (output: Output) => void;
     handleLogflow?: (output: Output) => void;
