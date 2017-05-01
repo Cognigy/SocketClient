@@ -2,6 +2,7 @@ import * as sio from "socket.io-client";
 import * as fetch from "isomorphic-fetch";
 import {Options} from "./interfaces/options";
 import {Output} from "./interfaces/output";
+import {IFinalPing} from "./interfaces/finalPing";
 
 /**
  * Class that exposes methods to easily connect to the cognigy brain-server,
@@ -208,20 +209,20 @@ export class CognigyClient {
             this.options.handleResetContext ? this.options.handleResetContext(data) : console.log("Successfully reset context: " + data);
         })
 
-        this.mySocket.on("logStep", (output: Output) => {
-            this.options.handleLogstep ? this.options.handleLogstep(output) : null;
+        this.mySocket.on("logStep", (data: any) => {
+            this.options.handleLogstep ? this.options.handleLogstep(data) : null;
         });
 
-        this.mySocket.on("logStepError", (output: Output) => {
-            this.options.handleLogstepError ? this.options.handleLogstepError(output) : null;
+        this.mySocket.on("logStepError", (data: any) => {
+            this.options.handleLogstepError ? this.options.handleLogstepError(data) : null;
         });
 
-        this.mySocket.on("logFlow", (output: Output) => {
-            this.options.handleLogflow ? this.options.handleLogflow(output) : null;
+        this.mySocket.on("logFlow", (data: any) => {
+            this.options.handleLogflow ? this.options.handleLogflow(data) : null;
         });
 
-        this.mySocket.on("finalPing", () => {
-            this.options.handlePing ? this.options.handlePing() : console.log("PING");
+        this.mySocket.on("finalPing", (finalPing: IFinalPing) => {
+            this.options.handlePing ? this.options.handlePing(finalPing) : console.log("PING");
         });
 
         return new Promise((resolve: Function, reject: Function) => {

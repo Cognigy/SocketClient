@@ -1,26 +1,26 @@
 {
-  "name": "@cognigy/cognigy-client",
-  "version": "0.4.0",
-  "description": "The cognigy client can be used to connect to the cognigy brain from a server project.",
-  "author": "Cognigy GmbH",
-  "license": "MIT",
-  "main": "index.js",
-  "typings": "index.d.ts",
-  "scripts": {
-    "prepublish": "tsc",
-    "build": "tsc"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/Cognigy/CognigyClient.git"
-  },
-  "dependencies": {
-    "isomorphic-fetch": "^2.2.1",
-    "socket.io-client": "^1.7.3",
-    "@types/isomorphic-fetch": "0.0.33",
-    "@types/socket.io-client": "^1.4.29"
-  },
-  "devDependencies": {
-    "typescript": "^2.2.2"
-  }
+    "name": "@cognigy/cognigy-client",
+    "version": "0.5.0",
+    "description": "The cognigy client can be used to connect to the cognigy brain from a server project.",
+    "author": "Cognigy GmbH",
+    "license": "MIT",
+    "main": "index.js",
+    "typings": "index.d.ts",
+    "scripts": {
+        "prepublish": "tsc",
+        "build": "tsc"
+    },
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/Cognigy/CognigyClient.git"
+    },
+    "devDependencies": {
+        "@types/isomorphic-fetch": "0.0.33",
+        "@types/socket.io-client": "1.4.29",
+        "typescript": "2.2.1"
+    },
+    "dependencies": {
+        "isomorphic-fetch": "^2.2.1",
+        "socket.io-client": "^1.7.3"
+    }
 }

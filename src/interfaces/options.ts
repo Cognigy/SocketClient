@@ -1,5 +1,6 @@
 import {CognigyError} from "./cognigyError";
 import {Output} from "./output";
+import {IFinalPing} from "./finalPing";
 
 export interface Options {
     baseUrl: string;
@@ -21,10 +22,12 @@ export interface Options {
     handleOutput?: (output: Output) => void;
     handleResetState?: (data: any) => void,
     handleResetContext?: (data: any) => void,
-    handleLogstep?: (output: Output) => void;
-    handleLogstepError?: (output: Output) => void;
-    handleLogflow?: (output: Output) => void;
-    handlePing?: () => void
+
+    handleLogstep?: (data: any) => void;
+    handleLogstepError?: (data: any) => void;
+    handleLogflow?: (data: any) => void;
+    
+    handlePing?: (finalPing: IFinalPing) => void
 
     res?: any;
     passthroughIP?: string;
