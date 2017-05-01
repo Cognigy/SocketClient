@@ -7,6 +7,10 @@ export interface Options {
     user: string;
     apikey: string;
 
+    channel: string;
+
+    keepMarkup?: boolean;
+
     flow: string;
     language: string;
     version?: number;

@@ -28,6 +28,9 @@ export class CognigyClient {
         this.endSess = 0;
         this.firstLoad = true;
 
+        if (options.keepMarkup === undefined)
+            this.options.keepMarkup = false;
+
         if (options.reconnection === undefined)
             this.options.reconnection = true;
 
@@ -58,7 +61,7 @@ export class CognigyClient {
     public connect(): Promise<SocketIOClient.Socket> {
         let currentToken: string;
 
-        return this.getToken(this.options.baseUrl, this.options.user, this.options.apikey, this.options.token)
+        return this.getToken(this.options.baseUrl, this.options.user, this.options.apikey, this.options.channel, this.options.token)
             .then((token : any) => {
                 return this.establishSocketConnection(token);
             })
@@ -198,6 +201,10 @@ export class CognigyClient {
         });
 
         this.mySocket.on("output", (output : Output) => {
+            if (!this.options.keepMarkup) {
+                output.text = output.text.replace(/<[^>]*>/g, "");
+            }
+
             this.options.handleOutput ? this.options.handleOutput(output) : console.log("Text: " + output.text + " Data: " + output.data);
         });
 
@@ -240,7 +247,7 @@ export class CognigyClient {
         });
     }
 
-    private getToken(baseUrl: string, user: string, apikey: string, token?: string): Promise<any> {
+    private getToken(baseUrl: string, user: string, apikey: string, channel: string, token?: string): Promise<any> {
         if (token)
             return Promise.resolve(token);
         else
@@ -252,6 +259,7 @@ export class CognigyClient {
                 method: "POST",
                 body: JSON.stringify({
                     user: user,
+                    channel: channel,
                     apikey: apikey
                 })
             })
