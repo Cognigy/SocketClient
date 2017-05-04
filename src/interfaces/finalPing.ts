@@ -1,3 +1,3 @@
 export interface IFinalPing {
-    type: string
+	type: string
 }

@@ -3,37 +3,35 @@ import {Output} from "./output";
 import {IFinalPing} from "./finalPing";
 
 export interface Options {
-    baseUrl: string;
-    user: string;
-    apikey: string;
+	baseUrl: string;
+	user: string;
+	apikey: string;
 
-    channel: string;
+	channel: string;
 
-    keepMarkup?: boolean;
+	keepMarkup?: boolean;
 
-    flow: string;
-    language: string;
-    version?: number;
+	flow: string;
+	language: string;
+	version?: number;
 
-    reconnection?: boolean;
-    interval?: number;
+	reconnection?: boolean;
+	interval?: number;
 
-    resetState?: boolean;
-    resetContext?: boolean;
+	resetState?: boolean;
+	resetContext?: boolean;
 
-    handleError?: (error: CognigyError) => void;
-    handleException?: (error: CognigyError) => void;
-    handleOutput?: (output: Output) => void;
-    handleResetState?: (data: any) => void,
-    handleResetContext?: (data: any) => void,
+	handleError?: (error: CognigyError) => void;
+	handleException?: (error: CognigyError) => void;
+	handleOutput?: (output: Output) => void;
 
-    handleLogstep?: (data: any) => void;
-    handleLogstepError?: (data: any) => void;
-    handleLogflow?: (data: any) => void;
-    
-    handlePing?: (finalPing: IFinalPing) => void
+	handleLogstep?: (data: any) => void;
+	handleLogstepError?: (data: any) => void;
+	handleLogflow?: (data: any) => void;
+	
+	handlePing?: (finalPing: IFinalPing) => void
 
-    res?: any;
-    passthroughIP?: string;
-    token?: string;
+	res?: any;
+	passthroughIP?: string;
+	token?: string;
 };
