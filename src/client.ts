@@ -230,10 +230,10 @@ export class CognigyClient {
 	 * Sends an arbitrary event to the brain-server using the underlying
 	 * socket.io connection.
 	 */
-	public sendEvent(event: string, data: any): void {
-		if (this.isConnected())
-			this.mySocket.emit(event, data);
-		else
+	public sendEvent(event: string, data: any, callback?: any): void {
+		if (this.isConnected()) {
+			(callback) ? this.mySocket.emit(event, data, callback) : this.mySocket.emit(event, data);
+		} else
 			throw new Error("Error in sendEvent - we are not connected");
 	}
 
