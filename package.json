@@ -1,11 +1,11 @@
 {
     "name": "@cognigy/cognigy-client",
-    "version": "0.8.0",
-    "description": "The cognigy client can be used to connect to the cognigy brain from a server project.",
+    "version": "0.8.1",
+    "description": "The Cognigy client can be used to connect to the Cognigy brain from a server project.",
     "author": "Cognigy GmbH",
     "license": "MIT",
-    "main": "index.js",
-    "typings": "index.d.ts",
+    "main": "build/index.js",
+    "typings": "build/index.d.ts",
     "scripts": {
         "prepublish": "tsc",
         "build": "tsc"
