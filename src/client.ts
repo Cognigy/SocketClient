@@ -9,7 +9,7 @@ import { IFinalPing } from "./interfaces/finalPing";
  * send events to the brain and received processed input-text.
  */
 export class CognigyClient {
-	private options: Options;
+	public options: Options;
 	private intervalId: any;
 	private mySocket: SocketIOClient.Socket;
 	private res: any;
