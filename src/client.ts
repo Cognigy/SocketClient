@@ -9,7 +9,7 @@ import { IFinalPing } from "./interfaces/finalPing";
  * send events to the brain and received processed input-text.
  */
 export class CognigyClient {
-	public options: Options;
+	protected options: Options;
 	private intervalId: any;
 	private mySocket: SocketIOClient.Socket;
 	private res: any;
@@ -173,8 +173,8 @@ export class CognigyClient {
 				}
 			}
 
-			this.mySocket.emit("injectContext", context, (currentState: string) => {
-				resolve(currentState);
+			this.mySocket.emit("injectContext", context, (newContext: any) => {
+				resolve(newContext);
 			});
 		});
 	}
@@ -197,8 +197,8 @@ export class CognigyClient {
 				reject("[Client] Error injecting state. The passed state is not a string.");
 			}
 
-			this.mySocket.emit("injectState", state, (currentState: string) => {
-				resolve(currentState);
+			this.mySocket.emit("injectState", state, (newState: string) => {
+				resolve(newState);
 			});
 		});
 	}
