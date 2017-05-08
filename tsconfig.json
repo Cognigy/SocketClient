@@ -3,10 +3,12 @@
     "module": "commonjs",
     "target": "es6",
     "declaration": true,
-    "inlineSourceMap": true
+    "inlineSourceMap": true,
+    "outDir": "build"
   },
   "exclude": [
     "node_modules",
-    "examples"
+    "examples",
+    "build"
   ]
 }

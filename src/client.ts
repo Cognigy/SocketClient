@@ -9,7 +9,7 @@ import { IFinalPing } from "./interfaces/finalPing";
  * send events to the brain and received processed input-text.
  */
 export class CognigyClient {
-	private options: Options;
+	protected options: Options;
 	private intervalId: any;
 	private mySocket: SocketIOClient.Socket;
 	private res: any;
@@ -121,27 +121,85 @@ export class CognigyClient {
 	 * Convenience method to send a "resetState" event.
 	 */
 	public resetState(): Promise<string> {
-		if (!this.isConnected()) {
-			console.error("[Client] Error resetting state. You are not connected to the brain-server.");
-			return Promise.reject("[Client] Error resetting state. You are not connected to the brain-server.");
-		}
+		return new Promise((resolve, reject) => {
+			if (!this.isConnected()) {
+				console.error("[Client] Error resetting state. You are not connected to the brain-server.");
+				reject("[Client] Error resetting state. You are not connected to the brain-server.");
+			}
 
-		this.mySocket.emit("resetState", (currentState: string) => {
-			return Promise.resolve(currentState);
+			this.mySocket.emit("resetState", (currentState: string) => {
+				resolve(currentState);
+			});
 		});
+		
 	}
 
 	/**
 	 * Convenience method to send a "resetContext" event.
 	 */
 	public resetContext(): Promise<any> {
-		if (!this.isConnected()) {
-			console.error("[Client] Error resetting context. You are not connected to the brain-server.");
-			return Promise.reject("[Client] Error resetting contenxt. You are not connected to the brain-server.");
-		}
+		return new Promise((resolve, reject) => {
+			if (!this.isConnected()) {
+				console.error("[Client] Error resetting context. You are not connected to the brain-server.");
+				reject("[Client] Error resetting contenxt. You are not connected to the brain-server.");
+			}
 
-		this.mySocket.emit("resetContext", (currentContext: any) => {
-			return Promise.resolve(currentContext);
+			this.mySocket.emit("resetContext", (currentContext: any) => {
+				resolve(currentContext);
+			});
+		});
+	}
+
+	/**
+	 * Convenience method to send a "injectContext" event.
+	 * 
+	 * @param context {any} Context object (should be valid JSON)
+	 */
+	public injectContext(context: any): Promise<string> {
+		return new Promise((resolve, reject) => {
+			if (!this.isConnected()) {
+				console.error("[Client] Error injecting context. You are not connected to the brain-server.");
+				reject("[Client] Error injecting context. You are not connected to the brain-server.");
+			}
+
+
+			if (typeof context !== 'object') {
+				// passed context is not a JSON object (or any object), trying to convert
+				try {
+					context = JSON.parse(context);
+				} catch (err) {
+					console.error("[Client] Error injecting context. The passed context is not JSON.");
+					reject("[Client] Error injecting context. The passed context is not JSON.");
+				}
+			}
+
+			this.mySocket.emit("injectContext", context, (newContext: any) => {
+				resolve(newContext);
+			});
+		});
+	}
+
+	/**
+	 * Convenience method to send a "injectState" event.
+	 * 
+	 * @param state {String} Name of the state
+	 */
+	public injectState(state: string): Promise<string> {
+		return new Promise((resolve, reject) => {
+			if (!this.isConnected()) {
+				console.error("[Client] Error injecting state. You are not connected to the brain-server.");
+				reject("[Client] Error injecting state. You are not connected to the brain-server.");
+			}
+
+			if (typeof state !== 'string') {
+				// passed state is not a string
+				console.error("[Client] Error injecting state. The passed state is not a string.");
+				reject("[Client] Error injecting state. The passed state is not a string.");
+			}
+
+			this.mySocket.emit("injectState", state, (newState: string) => {
+				resolve(newState);
+			});
 		});
 	}
 
@@ -172,10 +230,10 @@ export class CognigyClient {
 	 * Sends an arbitrary event to the brain-server using the underlying
 	 * socket.io connection.
 	 */
-	public sendEvent(event: string, data: any): void {
-		if (this.isConnected())
-			this.mySocket.emit(event, data);
-		else
+	public sendEvent(event: string, data: any, callback?: any): void {
+		if (this.isConnected()) {
+			(callback) ? this.mySocket.emit(event, data, callback) : this.mySocket.emit(event, data);
+		} else
 			throw new Error("Error in sendEvent - we are not connected");
 	}
 
