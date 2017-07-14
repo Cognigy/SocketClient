@@ -1,6 +1,9 @@
 # ignore project files
 .idea/
 
+# ignore build output
+build/
+
 # ignore npm files
 node_modules/
 npm-debug.log*
