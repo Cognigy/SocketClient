@@ -2,10 +2,11 @@ import * as sio from "socket.io-client";
 import * as fetch from "isomorphic-fetch";
 import { Options } from "./interfaces/options";
 import { Output } from "./interfaces/output";
+import { Input } from "./interfaces/input";
 import { IFinalPing } from "./interfaces/finalPing";
 
 /**
- * Class that exposes methods to easily connect to the cognigy brain-server,
+ * Class that exposes methods to easily connect to the cognigy CAI-server,
  * send events to the brain and received processed input-text.
  */
 export class CognigyClient {
@@ -13,20 +14,26 @@ export class CognigyClient {
 	private intervalId: any;
 	private mySocket: SocketIOClient.Socket;
 	private res: any;
-	private retBuffer: any;
-	public endSess: number;
 	private firstLoad: boolean;
+	private lastUsed: number;
+	private messageBuffer: Input[];
+	public endSess: number;
 
 	/**
 	 * Creates an instance of the CognigyClient and initializes the auto-reconnect
-	 * if configured. Auto-connects to the brain-server if auto-reconnect is configured.
+	 * if configured. Auto-connects to the CAI-server if auto-reconnect is configured.
+	 * 
+	 * @param {Options} options - The options the cognigy client should be initialized with.
+	 * @memberOf CognigyClient
 	 */
 	constructor(options: Options) {
 		this.options = options;
+		this.intervalId = null;
+		this.mySocket = null;
 		this.res = (options.res) ? options.res : null;
-		this.retBuffer = [];
 		this.endSess = 0;
 		this.firstLoad = true;
+		this.messageBuffer = [];
 
 		if (options.keepMarkup === undefined)
 			this.options.keepMarkup = false;
@@ -37,6 +44,9 @@ export class CognigyClient {
 		if (options.interval === undefined)
 			this.options.interval = 10000;
 
+		if (options.expiresIn === undefined)
+			this.options.expiresIn = null;
+
 		if (this.options.reconnection) {
 			this.intervalId = setInterval(() => {
 				if (!this.isConnected()) {
@@ -44,21 +54,38 @@ export class CognigyClient {
 
 					return this.connect()
 						.then(() => {
-							console.log("reconnected");
+							console.log(`[Client] Successfully reconnected to the CAI-server.`);
+
+							if (this.messageBuffer.length > 0) {
+								console.log(`[Client] Starting to send your buffered messages...`);
+
+								for (let msg of this.messageBuffer) {
+									this.sendMessage(msg.text, msg.data);
+								}
+
+								console.log(`[Client] Finished sending ${this.messageBuffer.length} buffered messages.`);
+								this.messageBuffer = [];
+							}
 						})
 						.catch((err: any) => {
-							console.log("error reconnecting", err);
+							console.error(`[Client] Failed to reconnect to the CAIi-server, error was: ${JSON.stringify(err)}`);
 						});
 				}
 			}, this.options.interval);
 		}
+
+		this.updateLastUsed();
 	}
 
 	/**
-	 * Retrieves a token and then connects to the brain-server via socket.io. This method will
+	 * Retrieves a token and then connects to the CAI-server via socket.io. This method will
 	 * fire the "init" event.
+	 *
+	 * @returns {Promise<SocketIOClient.Socket>} Resolved with the socket.io socket connected
+	 * to the CAI-server. The socket can be used to emit events and subscribe on them.
+	 * @memberOf CognigyClient
 	 */
-	public connect(): Promise<SocketIOClient.Socket> {
+	public connect(): Promise<any> {
 		let currentToken: string;
 
 		return this.getToken(this.options.baseUrl, this.options.user, this.options.apikey, this.options.channel, this.options.token)
@@ -105,44 +132,73 @@ export class CognigyClient {
 
 	/**
 	 * Convenience method to send a "resetFlow" event.
+	 *
+	 * @param {string} newFlowId - The id of a new flow that should be loaded into the
+	 * users brain on the CAI-server.
+	 * @param {string} language - The language of the flow.
+	 * @param {number} version - The version of the flow.
+	 * @returns {Promise<any>} Resolved when the "resetFlow" event was emitted to the server.
+	 * @memberOf CognigyClient
 	 */
-	public resetFlow(newFlowId: string, language: string, version: number): void {
-		if (this.isConnected())
+	public resetFlow(newFlowId: string, language: string, version: number): Promise<any> {
+		return new Promise((resolve: Function, reject: Function) => {
+			if (!this.isConnected()) {
+				const error: string = `[Client] Error resetting flow. You are not connected to the CAI-server.`;
+				console.error(error);
+				return reject(error);
+			}
+
+			this.updateLastUsed();
+
 			this.mySocket.emit("resetFlow", {
 				id: newFlowId,
 				language: language,
 				version: version
 			});
-		else
-			throw new Error("Error sending resetFlow event - we are not connected");
+
+			resolve();
+		});
 	}
 
 	/**
 	 * Convenience method to send a "resetState" event.
+	 *
+	 * @returns {Promise<string>} Resolved with the state that was set for the users brain
+	 * on the CAI-server.
+	 * @memberOf CognigyClient
 	 */
 	public resetState(): Promise<string> {
 		return new Promise((resolve, reject) => {
 			if (!this.isConnected()) {
-				console.error("[Client] Error resetting state. You are not connected to the brain-server.");
-				reject("[Client] Error resetting state. You are not connected to the brain-server.");
+				const error: string = `[Client] Error resetting state. You are not connected to the CAI-server.`;
+				console.error(error);
+				return reject(error);
 			}
+
+			this.updateLastUsed();
 
 			this.mySocket.emit("resetState", (currentState: string) => {
 				resolve(currentState);
 			});
 		});
-		
 	}
 
 	/**
 	 * Convenience method to send a "resetContext" event.
+	 *
+	 * @returns {Promise<any>} Resolved with the new context that was set within the users brain
+	 * on the CAI-server.
+	 * @membmerOf CognigyClient
 	 */
 	public resetContext(): Promise<any> {
 		return new Promise((resolve, reject) => {
 			if (!this.isConnected()) {
-				console.error("[Client] Error resetting context. You are not connected to the brain-server.");
-				reject("[Client] Error resetting contenxt. You are not connected to the brain-server.");
+				const error: string = `[Client] Error resetting context. You are not connected to the CAI-server.`;
+				console.error(error);
+				return reject(error);
 			}
+
+			this.updateLastUsed();
 
 			this.mySocket.emit("resetContext", (currentContext: any) => {
 				resolve(currentContext);
@@ -154,24 +210,30 @@ export class CognigyClient {
 	 * Convenience method to send a "injectContext" event.
 	 * 
 	 * @param context {any} Context object (should be valid JSON)
+	 * @returns {Promise<any>} Resolved with the context that was injected into the users brain
+	 * on the CAI-server.
+	 * @memberOf CognigyClient
 	 */
-	public injectContext(context: any): Promise<string> {
+	public injectContext(context: any): Promise<any> {
 		return new Promise((resolve, reject) => {
 			if (!this.isConnected()) {
-				console.error("[Client] Error injecting context. You are not connected to the brain-server.");
-				reject("[Client] Error injecting context. You are not connected to the brain-server.");
+				const error: string = `[Client] Error injecting context. You are not connected to the CAI-server.`;
+				console.error(error);
+				return reject(error);
 			}
-
 
 			if (typeof context !== 'object') {
 				// passed context is not a JSON object (or any object), trying to convert
 				try {
 					context = JSON.parse(context);
 				} catch (err) {
-					console.error("[Client] Error injecting context. The passed context is not JSON.");
-					reject("[Client] Error injecting context. The passed context is not JSON.");
+					const error: string = `[Client] Error injecting context. The passed context is not JSON.`;
+					console.error(error);
+					return reject(error);
 				}
 			}
+
+			this.updateLastUsed();
 
 			this.mySocket.emit("injectContext", context, (newContext: any) => {
 				resolve(newContext);
@@ -183,19 +245,26 @@ export class CognigyClient {
 	 * Convenience method to send a "injectState" event.
 	 * 
 	 * @param state {String} Name of the state
+	 * @returns {Promise<string>} Resolved with the state that was injected into the users brain on the
+	 * CAI-server.
+	 * @memberOf CognigyClient
 	 */
 	public injectState(state: string): Promise<string> {
 		return new Promise((resolve, reject) => {
 			if (!this.isConnected()) {
-				console.error("[Client] Error injecting state. You are not connected to the brain-server.");
-				reject("[Client] Error injecting state. You are not connected to the brain-server.");
+				const error: string = `[Client] Error injecting state. You are not connected to the CAI-server.`;
+				console.error(error);
+				return reject(error);
 			}
 
 			if (typeof state !== 'string') {
 				// passed state is not a string
-				console.error("[Client] Error injecting state. The passed state is not a string.");
-				reject("[Client] Error injecting state. The passed state is not a string.");
+				const error: string = `[Client] Error injecting state. The passed state is not a string.`;
+				console.error(error);
+				return reject(error);
 			}
+
+			this.updateLastUsed();
 
 			this.mySocket.emit("injectState", state, (newState: string) => {
 				resolve(newState);
@@ -204,55 +273,108 @@ export class CognigyClient {
 	}
 
 	/**
-	 * Sends a message to the brain-server.
+	 * Sends a message to the CAI-server.
+	 *
+	 * @param {string} text - The text of your message you want to send.
+	 * @param {any} data - The data you want to send.
+	 * @memberOf CognigyClient
 	 */
 	public sendMessage(text: string, data: any): void {
-		if (this.isConnected())
+		if (this.isConnected()) {
+			this.updateLastUsed();
+
 			this.mySocket.emit("input", {
 				text: text,
 				data: data
 			});
-		else
-			throw new Error("Error sending message - we are not connected");
+		} else {
+			// we currently have no connection - could be the case that we lost connection
+			// e.g. because of a server restart of the CAI-server. Buffer all incoming
+			// messages - they will be send when the connection was re-established
+			this.messageBuffer.push({ 
+				text: text, 
+				data: data 
+			});
+
+			console.log(`[Client] Unable to directly send your message since we are not connected to a CAI-server. Your message will be buffered and send later on.`);
+		}
 	}
 
 	/**
 	 * Directly registers event listener on the raw socket.io socket.
+	 *
+	 * @param {string} event - The name of the event to subscribe to.
+	 * @param {any} handler - The handler function to execute when the
+	 * event was triggered.
+	 * @memberOf CognigyClient
 	 */
 	public on(event: string, handler: any): void {
-		if (this.isConnected())
+		if (this.isConnected()) {
+			this.updateLastUsed();
+
 			this.mySocket.on(event, handler);
-		else
-			throw new Error("Error within on - we are not connected");
+		} else
+			console.log(`[Client] Unable to subscribe on socket.io-event. Currently not connected to a CAI-server.`);
 	}
 
 	/**
-	 * Sends an arbitrary event to the brain-server using the underlying
+	 * Sends an arbitrary event to the CAI-server using the underlying
 	 * socket.io connection.
+	 *
+	 * @param {string} event - The name of the event to send.
+	 * @param {any} data - The data you want to send.
+	 * @param {any} callback - An optional callback to can sepcify. It
+	 * will get called when the remote endpoint finished processing your
+	 * event and triggers it from the server side!
+	 * @memberOf CognigyClient
 	 */
 	public sendEvent(event: string, data: any, callback?: any): void {
 		if (this.isConnected()) {
+			this.updateLastUsed();
+
 			(callback) ? this.mySocket.emit(event, data, callback) : this.mySocket.emit(event, data);
 		} else
-			throw new Error("Error in sendEvent - we are not connected");
+			console.log(`[Client] Unable to send event. Currently not connected to a CAI-server.`);
 	}
 
 	/**
-	 * Disconnects from the brain-server and stops the auto-reconnect.
+	 * Disconnects from the CAI-server and stops the auto-reconnect.
+	 *
+	 * @memberOf CognigyClient
 	 */
 	public disconnect(): void {
 		clearInterval(this.intervalId);
+		this.intervalId = null;
 
-		if (this.mySocket)
+		if (this.mySocket) {
 			this.mySocket.disconnect();
+			this.mySocket = null;
+		}
 	}
 
 	/**
 	 * Checks whether the client has already established a connection to
-	 * the brain-server.
+	 * the CAI-server.
+	 *
+	 * @returns {boolean} True when currently connected to a CAI-server, false otherwise.
+	 * @memberOf CognigyClient
 	 */
 	public isConnected(): boolean {
 		return this.mySocket && this.mySocket.connected;
+	}
+
+	/**
+	 * Checks whether this client is already expired. Used to express whether the
+	 * client wasn't used for a long time.
+	 *
+	 * @returns {boolean} True in case the 'expiresIn' time already passed, false otherwise.
+	 * @memberOf CognigyClient
+	 */
+	public isExpired(): boolean {
+		if (this.options.expiresIn === null)
+			return false;
+
+		return (Date.now() - this.lastUsed) > this.options.expiresIn;
 	}
 
 	private establishSocketConnection(token: string): Promise<SocketIOClient.Socket> {
@@ -335,5 +457,9 @@ export class CognigyClient {
 					else
 						return Promise.reject(new Error("Unexptected error since no token was supplied as part of the response."));
 				});
+	}
+
+	private updateLastUsed(): void {
+		this.lastUsed = Date.now();
 	}
 }

@@ -1,4 +1,4 @@
 export interface Output {
-    text?: string,
-    data?: {}
+	text?: string;
+	data?: any
 }

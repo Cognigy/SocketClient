@@ -17,6 +17,7 @@ export interface Options {
 
 	reconnection?: boolean;
 	interval?: number;
+	expiresIn?: number;
 
 	resetState?: boolean;
 	resetContext?: boolean;
