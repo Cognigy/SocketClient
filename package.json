@@ -1,6 +1,6 @@
 {
     "name": "@cognigy/cognigy-client",
-    "version": "0.8.1",
+    "version": "1.0.1",
     "description": "The Cognigy client can be used to connect to the Cognigy brain from a server project.",
     "author": "Cognigy GmbH",
     "license": "MIT",
