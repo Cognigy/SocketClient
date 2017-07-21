@@ -392,7 +392,9 @@ export class CognigyClient {
 			if (!this.options.keepMarkup) {
 				try {
 					output.text = (output.text) ? output.text.replace(/<[^>]*>/g, "") : output.text;
-				} catch(err) {}
+				} catch(err) {
+					console.log("Error in replace. Output.text is of type " + typeof output.text + " and is " + output.text);
+				}
 			}
 
 			this.options.handleOutput ? this.options.handleOutput(output) : console.log("Text: " + output.text + " Data: " + output.data);
