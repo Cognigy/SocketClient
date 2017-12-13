@@ -1,4 +1,8 @@
 # Changelog
+## [Version 1.2.0] (13.12.2017 - 03:52 PM)
+#### Bugfixes
+* Add ``resetFlow`` option to ``Options`` interface so the user can override the builtin ``firstLoad`` functionality
+
 ## [Version 1.1.0] (28.07.2017 - 10:51 AM)
 #### Bugfixes
 * Properly handle condition witin the "output" event so the client does not crash when
