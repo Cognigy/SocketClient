@@ -1,4 +1,8 @@
 # Changelog
+## [Version 1.4.0] (13.12.2017 - 04:54 PM)
+#### Bugfixes
+* Fix bug where ``resetFlow`` value was not set because the one in ``Options`` was not used.
+
 ## [Version 1.3.0] (13.12.2017 - 04:41 PM)
 #### Bugfixes
 * Fix bug where headers did not work after the last update

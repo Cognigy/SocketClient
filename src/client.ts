@@ -107,7 +107,7 @@ export class CognigyClient {
 					language: this.options.language,
 					version: this.options.version,
 					passthroughIP: this.options.passthroughIP,
-					resetFlow: (this.resetFlow !== undefined) ? this.resetFlow : this.firstLoad,
+					resetFlow: (this.options.resetFlow !== undefined) ? this.options.resetFlow : this.firstLoad,
 					resetState: resetState,
 					resetContext: resetContext
 				});
