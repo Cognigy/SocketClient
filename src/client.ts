@@ -107,7 +107,7 @@ export class CognigyClient {
 					language: this.options.language,
 					version: this.options.version,
 					passthroughIP: this.options.passthroughIP,
-					resetFlow: this.firstLoad,
+					resetFlow: (this.resetFlow !== undefined) ? this.resetFlow : this.firstLoad,
 					resetState: resetState,
 					resetContext: resetContext
 				});
@@ -432,10 +432,10 @@ export class CognigyClient {
 			return Promise.resolve(token);
 		else
 			return fetch(baseUrl + "/loginDevice", {
-				headers: {
-					"Accept": "application/json",
-					"Content-Type": "application/json"
-				},
+				headers: [
+					["Accept", "application/json"],
+					["Content-Type", "application/json"]
+				],
 				method: "POST",
 				body: JSON.stringify({
 					user: user,

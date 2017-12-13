@@ -21,6 +21,7 @@ export interface Options {
 
 	resetState?: boolean;
 	resetContext?: boolean;
+	resetFlow?: boolean;
 
 	handleError?: (error: CognigyError) => void;
 	handleException?: (error: CognigyError) => void;
