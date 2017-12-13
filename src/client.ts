@@ -95,6 +95,7 @@ export class CognigyClient {
 			.then((socket: SocketIOClient.Socket) => {
 				let resetState = false;
 				let resetContext = false;
+				let resetFlow = true;
 
 				if (this.options.resetState !== null && this.options.resetState !== undefined && this.options.resetState === true)
 					resetState = true;
@@ -102,12 +103,16 @@ export class CognigyClient {
 				if (this.options.resetContext !== null && this.options.resetContext !== undefined && this.options.resetContext === true)
 					resetContext = true;
 
+				if (this.options.resetFlow !== null && this.options.resetFlow !== undefined && this.options.resetFlow === false)
+					resetFlow = false;
+
 				socket.emit("init", {
 					flowId: this.options.flow,
 					language: this.options.language,
 					version: this.options.version,
 					passthroughIP: this.options.passthroughIP,
-					resetFlow: (this.options.resetFlow !== undefined) ? this.options.resetFlow : this.firstLoad,
+					reloadFlow: (this.options.resetFlow !== undefined) ? this.options.resetFlow : this.firstLoad,
+					resetFlow: resetFlow,
 					resetState: resetState,
 					resetContext: resetContext
 				});
