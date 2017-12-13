@@ -92,9 +92,9 @@ export class CognigyClient {
 			.then((token: any) => {
 				return this.establishSocketConnection(token);
 			})
-			.then((socket: any) => {
-				let resetState: boolean = false;
-				let resetContext: boolean = false;
+			.then((socket: SocketIOClient.Socket) => {
+				let resetState = false;
+				let resetContext = false;
 
 				if (this.options.resetState !== null && this.options.resetState !== undefined && this.options.resetState === true)
 					resetState = true;
@@ -432,10 +432,10 @@ export class CognigyClient {
 			return Promise.resolve(token);
 		else
 			return fetch(baseUrl + "/loginDevice", {
-				headers: [
-					["Accept", "application/json"],
-					["Content-Type", "application/json"]
-				],
+				headers: {
+					"Accept": "application/json",
+					"Content-Type": "application/json"
+				},
 				method: "POST",
 				body: JSON.stringify({
 					user: user,
