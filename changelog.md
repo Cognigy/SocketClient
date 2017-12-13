@@ -1,4 +1,8 @@
 # Changelog
+## [Version 1.3.0] (13.12.2017 - 04:41 PM)
+#### Bugfixes
+* Fix bug where headers did not work after the last update
+
 ## [Version 1.2.0] (13.12.2017 - 03:52 PM)
 #### Bugfixes
 * Add ``resetFlow`` option to ``Options`` interface so the user can override the builtin ``firstLoad`` functionality
