@@ -20,7 +20,7 @@ export class CognigyClient {
 	private lastUsed: number;
 	private messageBuffer: Input[];
 	public endSess: number;
-	private token: any;
+	private token: IToken;
 
 	/**
 	 * Creates an instance of the CognigyClient and initializes the auto-reconnect
