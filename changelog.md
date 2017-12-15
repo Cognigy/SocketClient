@@ -1,4 +1,9 @@
 # Changelog
+
+## [Version 1.5.1] (15.12.2017 - 03.22 PM)
+#### Features
+* Added methods to retrieve ``organisation`` and ``user id`` from ``JWT``
+
 ## [Version 1.4.0] (13.12.2017 - 04:54 PM)
 #### Bugfixes
 * Fix bug where ``resetFlow`` value was not set because the one in ``Options`` was not used.
