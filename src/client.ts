@@ -4,6 +4,8 @@ import { Options } from "./interfaces/options";
 import { Output } from "./interfaces/output";
 import { Input } from "./interfaces/input";
 import { IFinalPing } from "./interfaces/finalPing";
+import { IToken } from "./interfaces/token";
+import * as jwt from "jsonwebtoken";
 
 /**
  * Class that exposes methods to easily connect to the cognigy CAI-server,
@@ -18,6 +20,7 @@ export class CognigyClient {
 	private lastUsed: number;
 	private messageBuffer: Input[];
 	public endSess: number;
+	private token: any;
 
 	/**
 	 * Creates an instance of the CognigyClient and initializes the auto-reconnect
@@ -90,6 +93,7 @@ export class CognigyClient {
 
 		return this.getToken(this.options.baseUrl, this.options.user, this.options.apikey, this.options.channel, this.options.token)
 			.then((token: any) => {
+				this.token = token;
 				return this.establishSocketConnection(token);
 			})
 			.then((socket: SocketIOClient.Socket) => {
@@ -462,6 +466,32 @@ export class CognigyClient {
 					else
 						return Promise.reject(new Error("Unexptected error since no token was supplied as part of the response."));
 				});
+	}
+	
+	/**
+	 * This method retrieves the organisationId from the jwt token if it exists
+	 * 
+	 * @returns {string} Returns the organisation id
+	 * @memberOf CognigyClient
+	 */
+	public getOrganisation(): string {
+		const decodedToken = jwt.decode(this.token) as IToken;
+		const { organisation } = decodedToken;
+
+		return organisation;
+	}
+
+	/**
+	 * This method retrieves the userId from the jwt token if it exists
+	 * 
+	 * @returns {string} Returns the user id
+	 * @memberOf CognigyClient
+	 */
+	public getUser(): string {
+		const decodedToken = jwt.decode(this.token) as IToken;
+		const { id } = decodedToken;
+
+		return id;
 	}
 
 	private updateLastUsed(): void {
