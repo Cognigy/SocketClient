@@ -91,7 +91,7 @@ export class CognigyClient {
 	public connect(): Promise<any> {
 		let currentToken: string;
 
-		return this.getToken(this.options.baseUrl, this.options.user, this.options.apikey, this.options.channel, this.options.token)
+		return this.getToken(this.options.baseUrl, this.options.user, this.options.apikey, this.options.channel, this.options.token, this.options.session)
 			.then((token: any) => {
 				this.token = token;
 				return this.establishSocketConnection(token);
@@ -436,7 +436,7 @@ export class CognigyClient {
 		});
 	}
 
-	private getToken(baseUrl: string, user: string, apikey: string, channel: string, token?: string): Promise<any> {
+	private getToken(baseUrl: string, user: string, apikey: string, channel: string, token?: string, session?: string): Promise<any> {
 		if (token)
 			return Promise.resolve(token);
 		else
@@ -449,7 +449,8 @@ export class CognigyClient {
 				body: JSON.stringify({
 					user: user,
 					channel: channel,
-					apikey: apikey
+					apikey: apikey,
+					session
 				})
 			})
 				.then((resBody: any) => {

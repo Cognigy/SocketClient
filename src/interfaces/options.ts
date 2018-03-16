@@ -5,6 +5,10 @@ import {IFinalPing} from "./finalPing";
 export interface Options {
 	baseUrl: string;
 	user: string;
+
+	/* The current session for this user. Used to generate unique sessions for a user on each new "connect" */
+	session?: string;
+
 	apikey: string;
 
 	channel: string;
