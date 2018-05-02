@@ -4,20 +4,15 @@ import {IFinalPing} from "./finalPing";
 
 export interface Options {
 	baseUrl: string;
+	URLToken: string;
 	user: string;
 
 	/* The current session for this user. Used to generate unique sessions for a user on each new "connect" */
-	session?: string;
-
-	apikey: string;
+	session: string;
 
 	channel: string;
 
 	keepMarkup?: boolean;
-
-	flow: string;
-	language: string;
-	version?: number;
 
 	reconnection?: boolean;
 	interval?: number;
@@ -40,5 +35,4 @@ export interface Options {
 
 	res?: any;
 	passthroughIP?: string;
-	token?: string;
 };
