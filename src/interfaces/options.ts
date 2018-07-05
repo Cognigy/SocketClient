@@ -32,10 +32,6 @@ export interface Options {
 	handleException?: (error: CognigyError) => void;
 	handleOutput?: (output: IOutput) => void;
 
-	handleLogstep?: (data: any) => void;
-	handleLogstepError?: (data: any) => void;
-	handleLogflow?: (data: any) => void;
-
 	handlePing?: (finalPing: IFinalPing) => void
 
 	passthroughIP?: string;
