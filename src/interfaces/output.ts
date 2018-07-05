@@ -1,4 +1,4 @@
-export interface IProcessOutputPayload {
+export interface IProcessReplyPayload {
 	type: "logStep" | "logStepError" | "output" | "finalPing" | "error";
 	data: IProcessOutputData;
 }
@@ -13,4 +13,9 @@ export interface IProcessOutputData {
 
 	// for other events
 	[key: string]: any;
+}
+
+export interface IOutput {
+	text?: string;
+	data?: { [key: string]: any };
 }
