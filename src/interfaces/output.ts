@@ -1,5 +1,5 @@
 export interface IProcessReplyPayload {
-	type: "logStep" | "logStepError" | "output" | "finalPing" | "error";
+	type: "output" | "finalPing" | "error";
 	data: IProcessOutputData;
 }
 
