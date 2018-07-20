@@ -47,7 +47,7 @@ const options : Options = {
 let client : CognigyClient = new CognigyClient(options);
 client.connect()
     .then(() => {
-        client.sendMessage("I like pizza", { key: value });
+        client.sendMessage("I like pizza", { key: "value" });
     })
     .catch((error) => {
         console.log(error);
