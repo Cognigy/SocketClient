@@ -50,7 +50,7 @@ export class CognigyClient {
 
 					return this.connect()
 						.then(() => {
-							console.log(`[Client] Successfully reconnected to the CAI-server.`);
+							console.log(`[Client] Successfully reconnected.`);
 
 							if (this.messageBuffer.length > 0) {
 								console.log(`[Client] Starting to send your buffered messages...`);
@@ -64,7 +64,7 @@ export class CognigyClient {
 							}
 						})
 						.catch((err: any) => {
-							console.error(`[Client] Failed to reconnect to the CAIi-server, error was: ${JSON.stringify(err)}`);
+							console.error(`[Client] Failed to reconnect, error was: ${JSON.stringify(err)}`);
 						});
 				}
 			}, this.options.interval);
@@ -119,14 +119,14 @@ export class CognigyClient {
 
 		} else {
 			// we currently have no connection - could be the case that we lost connection
-			// e.g. because of a server restart of the CAI-server. Buffer all incoming
+			// e.g. because of a server restart of the AI-server. Buffer all incoming
 			// messages - they will be send when the connection was re-established
 			this.messageBuffer.push({
 				text: text,
 				data: data
 			});
 
-			console.log(`[Client] Unable to directly send your message since we are not connected to a CAI-server. Your message will be buffered and send later on.`);
+			console.log(`[Client] Unable to directly send your message since we are not connected. Your message will be buffered and sent later on.`);
 		}
 	}
 
@@ -171,7 +171,11 @@ export class CognigyClient {
 	}
 
 	private establishSocketConnection(): Promise<SocketIOClient.Socket> {
-		this.mySocket = sio.connect(this.options.baseUrl, { "reconnection": false, "upgrade": false });
+		this.mySocket = sio.connect(this.options.baseUrl, {
+			"reconnection": false,
+			"upgrade": true,
+			"transports": this.options.forceWebsockets ? ["websocket"] : ["polling", "websocket"]
+		});
 
 		this.mySocket.on("error", (error: any) => {
 			this.options.handleError ? this.options.handleError(error) : console.log(error);
@@ -182,8 +186,6 @@ export class CognigyClient {
 		});
 
 		this.mySocket.on("output", (reply: IProcessReplyPayload) => {
-			/** Logging received response for debugging purpose */
-			console.log(JSON.stringify(reply, null, 2));
 
 			if (reply && reply.type === "error") {
 				this.options.handleError ? this.options.handleError(reply.data.error) : console.log(reply.data.error.message);
@@ -207,7 +209,7 @@ export class CognigyClient {
 
 		return new Promise((resolve: Function, reject: Function) => {
 			this.mySocket.on("connect", () => {
-				console.log("[Client] Brain connection established");
+				console.log("[Client] connection established");
 				resolve(this.mySocket);
 			});
 

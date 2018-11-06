@@ -35,4 +35,9 @@ export interface Options {
 	handlePing?: (finalPing: IFinalPing) => void
 
 	passthroughIP?: string;
+
+	/**
+	 * Whether to force a websocket connection.
+	 */
+	forceWebsockets: boolean;
 };
