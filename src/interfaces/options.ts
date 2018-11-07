@@ -1,23 +1,23 @@
-import {CognigyError} from "./cognigyError";
-import {Output} from "./output";
-import {IFinalPing} from "./finalPing";
+import { CognigyError } from "./cognigyError";
+import { IOutput } from "./output";
+import { IFinalPing } from "./finalPing";
 
 export interface Options {
+	/** Base URL of Socket Endpoint */
 	baseUrl: string;
-	user: string;
+
+	/** The URL Token of the specific Socket Endpoint configured in the Endpoint Editor */
+	URLToken: string;
+	/** User ID of the corresponding Contact Profile */
+	userId: string;
 
 	/* The current session for this user. Used to generate unique sessions for a user on each new "connect" */
-	session?: string;
+	sessionId: string;
 
-	apikey: string;
-
+	/** The identifier of the channel on which the client runs */
 	channel: string;
 
 	keepMarkup?: boolean;
-
-	flow: string;
-	language: string;
-	version?: number;
 
 	reconnection?: boolean;
 	interval?: number;
@@ -30,15 +30,14 @@ export interface Options {
 
 	handleError?: (error: CognigyError) => void;
 	handleException?: (error: CognigyError) => void;
-	handleOutput?: (output: Output) => void;
+	handleOutput?: (output: IOutput) => void;
 
-	handleLogstep?: (data: any) => void;
-	handleLogstepError?: (data: any) => void;
-	handleLogflow?: (data: any) => void;
-	
 	handlePing?: (finalPing: IFinalPing) => void
 
-	res?: any;
 	passthroughIP?: string;
-	token?: string;
+
+	/**
+	 * Whether to force a websocket connection.
+	 */
+	forceWebsockets: boolean;
 };
