@@ -1,6 +1,7 @@
 import { CognigyError } from "./cognigyError";
 import { IOutput } from "./output";
 import { IFinalPing } from "./finalPing";
+import { TTypingStatus } from "./typingStatus";
 
 export interface Options {
 	/** Base URL of Socket Endpoint */
@@ -31,6 +32,7 @@ export interface Options {
 	handleError?: (error: CognigyError) => void;
 	handleException?: (error: CognigyError) => void;
 	handleOutput?: (output: IOutput) => void;
+	handleTypingStatus?: (status: TTypingStatus) => void;
 
 	handlePing?: (finalPing: IFinalPing) => void
 

@@ -4,6 +4,7 @@ import { IOutput } from "./interfaces/output";
 import { IProcessReplyPayload } from "./interfaces/output";
 import { Input } from "./interfaces/input";
 import { IFinalPing } from "./interfaces/finalPing";
+import { ITypingStatusPayload } from "./interfaces/typingStatus";
 
 /**
  * Class that exposes methods to easily connect to the cognigy CAI-server,
@@ -202,6 +203,9 @@ export class CognigyClient {
 				this.options.handleOutput ? this.options.handleOutput(output) : console.log("Text: " + output.text + " Data: " + output.data);
 			}
 		});
+
+		this.mySocket.on("typingStatus", (payload: ITypingStatusPayload) =>
+			this.options.handleTypingStatus ? this.options.handleTypingStatus(payload.status) : null);
 
 		this.mySocket.on("finalPing", (finalPing: IFinalPing) => {
 			this.options.handlePing ? this.options.handlePing(finalPing) : console.log("[Client] PING");
