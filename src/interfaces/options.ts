@@ -1,14 +1,4 @@
-import { CognigyError } from "./cognigyError";
-import { IOutput } from "./output";
-import { IFinalPing } from "./finalPing";
-import { TTypingStatus } from "./typingStatus";
-
 export interface Options {
-	/** Base URL of Socket Endpoint */
-	baseUrl: string;
-
-	/** The URL Token of the specific Socket Endpoint configured in the Endpoint Editor */
-	URLToken: string;
 	/** User ID of the corresponding Contact Profile */
 	userId: string;
 
@@ -18,23 +8,14 @@ export interface Options {
 	/** The identifier of the channel on which the client runs */
 	channel: string;
 
-	keepMarkup?: boolean;
+	reconnection: boolean;
+	interval: number;
+	expiresIn: number;
 
-	reconnection?: boolean;
-	interval?: number;
-	expiresIn?: number;
-
-	resetState?: boolean;
-	resetContext?: boolean;
-	reloadFlow?: boolean;
-	resetFlow?: boolean;
-
-	handleError?: (error: CognigyError) => void;
-	handleException?: (error: CognigyError) => void;
-	handleOutput?: (output: IOutput) => void;
-	handleTypingStatus?: (status: TTypingStatus) => void;
-
-	handlePing?: (finalPing: IFinalPing) => void
+	resetState: boolean;
+	resetContext: boolean;
+	reloadFlow: boolean;
+	resetFlow: boolean;
 
 	passthroughIP?: string;
 

@@ -1,25 +1,20 @@
 {
-    "name": "@cognigy/cognigy-client",
-    "version": "3.0.0",
-    "description": "The Cognigy client can be used to connect to the Cognigy brain from a server project.",
-    "author": "Cognigy GmbH",
-    "license": "MIT",
-    "main": "build/index.js",
-    "typings": "build/index.d.ts",
-    "scripts": {
-        "prepublish": "tsc",
-        "build": "tsc"
-    },
-    "repository": {
-        "type": "git",
-        "url": "https://github.com/Cognigy/CognigyClient.git"
-    },
-    "devDependencies": {
-        "@types/socket.io-client": "^1.4.32",
-        "typescript": "^3.1.6"
-    },
-    "dependencies": {
-        "jsonwebtoken": "^8.1.0",
-        "socket.io-client": "^2.1.1"
-    }
+  "name": "@cognigy/socket-client",
+  "version": "3.0.0",
+  "description": "A client used to connect to Cognigy installations through Socket-Endpoints",
+  "author": "Robin Schuster <r.schuster@cognigy.com>",
+  "license": "MIT",
+  "main": "lib/socket-client.js",
+  "scripts": {
+    "build": "tsc"
+  },
+  "dependencies": {
+    "socket.io-client": "^2.2.0",
+    "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "@types/socket.io-client": "^1.4.32",
+    "@types/uuid": "^3.4.4",
+    "typescript": "^3.4.5"
+  }
 }

@@ -3,6 +3,7 @@
 
 # ignore npm files
 node_modules/
+lib/
 npm-debug.log*
 
 # os generated files

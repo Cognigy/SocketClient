@@ -1,14 +1,14 @@
 {
-  "compilerOptions": {
-    "module": "commonjs",
-    "target": "es6",
-    "declaration": true,
-    "inlineSourceMap": true,
-    "outDir": "build"
-  },
-  "exclude": [
-    "node_modules",
-    "examples",
-    "build"
-  ]
+ "compilerOptions": {
+   "module": "commonjs",
+   "declaration": true,
+   "target": "es6",
+   "outDir": "lib",
+   "lib": [
+     "es6"
+   ]
+ },
+ "exclude": [
+   "node_modules"
+ ]
 }
