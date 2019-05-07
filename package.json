@@ -5,6 +5,7 @@
   "author": "Robin Schuster <r.schuster@cognigy.com>",
   "license": "MIT",
   "main": "lib/socket-client.js",
+  "types": "lib/socket-client",
   "scripts": {
     "build": "tsc"
   },
