@@ -12,11 +12,11 @@ npm install @cognigy/socket-client
 ## Usage
 
 ```javascript
-const SocketClient = require('socket-client');
+const CognigySocketClient = require('@cognigy/socket-client');
 
 (async () => {
     // create a client instance with a socket url and an url token
-    const client = new SocketClient('https://socket.url', 'socket-token');
+    const client = new CognigySocketClient.SocketClient('https://socket.url', 'socket-token');
 
     // register a handler for messages
     client.on('output', output => {
