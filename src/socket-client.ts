@@ -127,8 +127,27 @@ export class SocketClient extends EventEmitter {
                 : ["polling", "websocket"]
         });
 
+        // forward Socket.IO events
+        [
+            'connect',
+            'connect_error',
+            'connect_timeout',
+            'error',
+            'disconnect',
+            'reconnect',
+            'reconnect_attempt',
+            'reconnecting',
+            'reconnect_error',
+            'reconnect_failed',
+            'ping',
+            'pong'
+        ].forEach(eventName => {
+            socket.on(eventName, e => {
+                this.emit(`socket/${eventName}`, e)
+            });
+        });
+
         // pass through basic events
-        socket.on("error", (error: any) => this.emit('error', error));
         socket.on("exception", (error: any) => this.emit('exception', error));
         socket.on("typingStatus", (payload: ITypingStatusPayload) => this.emit('typingStatus', payload));
         // TODO fix, it's in output
@@ -147,12 +166,12 @@ export class SocketClient extends EventEmitter {
             }
         });
 
-        
+
         // return success based on connection status
         return new Promise((resolve, reject) => {
             socket.on("connect_error", () => reject(new Error("[SocketClient] Error connecting")));
             socket.on("connect_timeout", () => reject(new Error("[SocketClient] Error connecting")));
-            
+
             socket.on("connect", () => {
                 console.log("[SocketClient] connection established");
                 this.socket = socket;
@@ -162,7 +181,7 @@ export class SocketClient extends EventEmitter {
                 // if configured, initialize automatic reconnect attempts
                 if (this.socketOptions.reconnection)
                     this.setupReconnectInterval();
-                    
+
                 resolve(this);
             });
         });
