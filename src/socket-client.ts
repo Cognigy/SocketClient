@@ -8,7 +8,6 @@ import { Input } from "./interfaces/input";
 import { IFinalPing } from "./interfaces/finalPing";
 import { ITypingStatusPayload } from "./interfaces/typingStatus";
 
-
 export class SocketClient extends EventEmitter {
     public socketUrl: string;
     public socketURLToken: string;
@@ -119,7 +118,12 @@ export class SocketClient extends EventEmitter {
 
 
     public async connect(): Promise<any> {
-        const socket = SocketIOClient.connect(this.socketUrl, {
+        const parsedUrl = new URL(this.socketUrl);
+        const path = parsedUrl.pathname && parsedUrl.pathname !== "/" ?
+            parsedUrl.pathname + "/socket.io" : null;
+
+        const socket = SocketIOClient.connect(parsedUrl.origin, {
+            path,
             reconnection: false,
             upgrade: true,
             transports: this.socketOptions.forceWebsockets
