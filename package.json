@@ -3,7 +3,7 @@
   "version": "4.1.0",
   "description": "A client used to connect to Cognigy installations through Socket-Endpoints",
   "author": "Robin Schuster <r.schuster@cognigy.com>",
-  "license": "MIT",
+  "license": "SEE LICENSE IN LICENSE",
   "main": "lib/socket-client.js",
   "types": "lib/socket-client",
   "scripts": {
