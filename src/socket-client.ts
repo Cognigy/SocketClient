@@ -127,7 +127,7 @@ export class SocketClient extends EventEmitter {
             reconnection: false,
             upgrade: true,
             transports: this.socketOptions.forceWebsockets
-                ? ["websocket"]	
+                ? ["websocket"]
                 : ["polling", "websocket"]
         });
 
