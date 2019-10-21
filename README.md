@@ -16,7 +16,10 @@ const { SocketClient } = require('@cognigy/socket-client');
 
 (async () => {
     // create a client instance with a socket url and an url token
-    const client = new SocketClient('https://socket.url', 'socket-token');
+    const client = new SocketClient('https://socket.url', 'socket-token', {
+      // if you use node, internet explorer or safari, you need to enforce websockets
+      forceWebsockets: true
+    });
 
     // register a handler for messages
     client.on('output', output => {
