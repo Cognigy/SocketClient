@@ -12,7 +12,7 @@ npm install @cognigy/socket-client
 ## Usage
 
 ```javascript
-const [SocketClient] = require('@cognigy/socket-client');
+const { SocketClient } = require('@cognigy/socket-client');
 
 (async () => {
     // create a client instance with a socket url and an url token
