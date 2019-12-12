@@ -7,6 +7,7 @@ import { IProcessReplyPayload } from "./interfaces/output";
 import { Input } from "./interfaces/input";
 import { IFinalPing } from "./interfaces/finalPing";
 import { ITypingStatusPayload } from "./interfaces/typingStatus";
+import { shouldForceWebsockets } from "./helper/compatibility";
 
 export class SocketClient extends EventEmitter {
     public socketUrl: string;
@@ -29,7 +30,7 @@ export class SocketClient extends EventEmitter {
 
             // connection behaviour
             expiresIn: null,
-            forceWebsockets: false,
+            forceWebsockets: shouldForceWebsockets(),
             interval: 10000,
             passthroughIP: null,
             reconnection: true,
