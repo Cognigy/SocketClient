@@ -7,7 +7,8 @@
   "main": "lib/socket-client.js",
   "types": "lib/socket-client",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc",
+    "prepare": "npm run build"
   },
   "dependencies": {
     "detect-browser": "^4.8.0",

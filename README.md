@@ -69,4 +69,5 @@ const client = new SocketClient('https://socket.url', 'socket-token', {
 | `forceWebsockets` | boolean | `false` | if this is enabled, there will be no fallback to http polling
 | `interval` | number | `10000` | the interval for polling if in http polling fallback
 | `reconnection` | boolean | `true` | if enabled, will try to reconnect if the connection is aborted
+| `reconnectionLimit` | number | `5` | limit the maximum number of reconnection attempts
 
