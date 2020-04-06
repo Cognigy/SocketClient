@@ -77,7 +77,6 @@ export class SocketClient extends EventEmitter {
             console.log(`[SocketClient] Reconnection attempts limit reached. Giving up.`);
         }
 
-        console.log("[SocketClient] Registering reconnect attempt... ", this.reconnectCounter);
     }
 
     private shouldStopReconnecting(): boolean {
@@ -103,11 +102,9 @@ export class SocketClient extends EventEmitter {
 
     private setupReconnectInterval() {
         if (!this.socketReconnectInterval) {
-            console.log("================================== SETTING UP INTERVAL");
             this.socketReconnectInterval = setInterval(async () => {
                 if (!this.connected && !this.shouldStopReconnecting()) {
                     this.registerReconnectionAttempt();
-                    console.log("#############", this.reconnectCounter)
                     console.log("[SocketClient] Trying to reconnect");
                     try {
                         await this.connect();
