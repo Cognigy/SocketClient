@@ -5,7 +5,6 @@ import { Options } from "./interfaces/options";
 import { IOutput } from "./interfaces/output";
 import { IProcessReplyPayload } from "./interfaces/output";
 import { Input } from "./interfaces/input";
-import { IFinalPing } from "./interfaces/finalPing";
 import { ITypingStatusPayload } from "./interfaces/typingStatus";
 import { shouldForceWebsockets } from "./helper/compatibility";
 
@@ -72,9 +71,11 @@ export class SocketClient extends EventEmitter {
 
     private registerReconnectionAttempt(): void {
         this.reconnectCounter++;
+        console.log("[SocketClient] Trying to reconnect");
 
         if (this.shouldStopReconnecting()) {
             console.log(`[SocketClient] Reconnection attempts limit reached. Giving up.`);
+            this.emit("socket/error", { type: "RECONNECTION_LIMIT"});
         }
 
     }
@@ -105,7 +106,6 @@ export class SocketClient extends EventEmitter {
             this.socketReconnectInterval = setInterval(async () => {
                 if (!this.connected && !this.shouldStopReconnecting()) {
                     this.registerReconnectionAttempt();
-                    console.log("[SocketClient] Trying to reconnect");
                     try {
                         await this.connect();
                         console.log(`[SocketClient] Successfully reconnected.`);
@@ -175,9 +175,7 @@ export class SocketClient extends EventEmitter {
 
         // pass through basic events
         socket.on("exception", (error: any) => this.emit('exception', error));
-        socket.on("typingStatus", (payload: ITypingStatusPayload) => this.emit('typingStatus', payload));
-        // TODO fix, it's in output
-        socket.on("finalPing", (finalPing: IFinalPing) => this.emit('finalPing', finalPing));
+        socket.on("typingStatus", (payload: ITypingStatusPayload) => this.emit('typingStatus', payload));   
 
         // decide positive / negative outcome of output based on content
         socket.on("output", (reply: IProcessReplyPayload) => {
@@ -189,6 +187,10 @@ export class SocketClient extends EventEmitter {
                 let output: IOutput = reply.data;
 
                 this.emit('output', output);
+            }
+
+            if (reply && reply.type === "finalPing") {
+                this.emit('finalPing', reply.data)
             }
         });
 
