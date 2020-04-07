@@ -81,7 +81,9 @@ export class SocketClient extends EventEmitter {
     }
 
     private shouldStopReconnecting(): boolean {
-        return this.reconnectCounter > (this.socketOptions.reconnectionLimit - 1);
+        const { reconnectionLimit } = this.socketOptions;
+
+        return (reconnectionLimit !== 0) && (reconnectionLimit <= this.reconnectCounter);
     }
 
 
