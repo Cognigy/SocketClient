@@ -5,7 +5,6 @@ import { Options } from "./interfaces/options";
 import { IOutput } from "./interfaces/output";
 import { IProcessReplyPayload } from "./interfaces/output";
 import { Input } from "./interfaces/input";
-import { IFinalPing } from "./interfaces/finalPing";
 import { ITypingStatusPayload } from "./interfaces/typingStatus";
 import { shouldForceWebsockets } from "./helper/compatibility";
 
@@ -16,6 +15,7 @@ export class SocketClient extends EventEmitter {
 
     private socket: SocketIOClient.Socket;
     private socketReconnectInterval: NodeJS.Timeout;
+    private reconnectCounter: number;
 
     private messageBuffer: Input[] = [];
     private lastUsed: number;
@@ -34,6 +34,7 @@ export class SocketClient extends EventEmitter {
             interval: 10000,
             passthroughIP: null,
             reconnection: true,
+            reconnectionLimit: 5,
 
             // optional brain commands
             // TODO remove if possible
@@ -59,10 +60,31 @@ export class SocketClient extends EventEmitter {
         this.socketUrl = socketUrl;
         this.socketURLToken = socketToken;
         this.socketOptions = SocketClient.completeSocketOptions(options);
+        this.reconnectCounter = 0;
 
         this.updateLastUsed();
     }
 
+    private resetReconnectionCounter() {
+        this.reconnectCounter = 0;
+    }
+
+    private registerReconnectionAttempt(): void {
+        this.reconnectCounter++;
+        console.log("[SocketClient] Trying to reconnect");
+
+        if (this.shouldStopReconnecting()) {
+            console.log(`[SocketClient] Reconnection attempts limit reached. Giving up.`);
+            this.emit("socket/error", { type: "RECONNECTION_LIMIT"});
+        }
+
+    }
+
+    private shouldStopReconnecting(): boolean {
+        const { reconnectionLimit } = this.socketOptions;
+
+        return (reconnectionLimit !== 0) && (reconnectionLimit <= this.reconnectCounter);
+    }
 
 
     private flushMessageBuffer() {
@@ -82,18 +104,19 @@ export class SocketClient extends EventEmitter {
     }
 
     private setupReconnectInterval() {
-        this.socketReconnectInterval = setInterval(async () => {
-            if (!this.connected) {
-                console.log("[SocketClient] Trying to reconnect");
-
-                try {
-                    await this.connect();
-                    console.log(`[SocketClient] Successfully reconnected.`);
-                } catch (err) {
-                    console.error(`[SocketClient] Failed to reconnect, error was: ${JSON.stringify(err)}`);
-                };
-            }
-        }, this.socketOptions.interval);
+        if (!this.socketReconnectInterval) {
+            this.socketReconnectInterval = setInterval(async () => {
+                if (!this.connected && !this.shouldStopReconnecting()) {
+                    this.registerReconnectionAttempt();
+                    try {
+                        await this.connect();
+                        console.log(`[SocketClient] Successfully reconnected.`);
+                    } catch (err) {
+                        console.error(`[SocketClient] Failed to reconnect, error was: ${JSON.stringify(err)}`);
+                    };
+                }
+            }, this.socketOptions.interval);
+        }
     }
 
     private updateLastUsed() {
@@ -154,9 +177,7 @@ export class SocketClient extends EventEmitter {
 
         // pass through basic events
         socket.on("exception", (error: any) => this.emit('exception', error));
-        socket.on("typingStatus", (payload: ITypingStatusPayload) => this.emit('typingStatus', payload));
-        // TODO fix, it's in output
-        socket.on("finalPing", (finalPing: IFinalPing) => this.emit('finalPing', finalPing));
+        socket.on("typingStatus", (payload: ITypingStatusPayload) => this.emit('typingStatus', payload));   
 
         // decide positive / negative outcome of output based on content
         socket.on("output", (reply: IProcessReplyPayload) => {
@@ -168,6 +189,10 @@ export class SocketClient extends EventEmitter {
                 let output: IOutput = reply.data;
 
                 this.emit('output', output);
+            }
+
+            if (reply && reply.type === "finalPing") {
+                this.emit('finalPing', reply.data)
             }
         });
 
@@ -206,6 +231,7 @@ export class SocketClient extends EventEmitter {
 
     public sendMessage(text: string, data?: any): SocketClient {
         if (this.connected) {
+            this.resetReconnectionCounter();
             this.updateLastUsed();
 
             /* Send the processInput event to the endpoint */

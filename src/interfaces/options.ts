@@ -9,6 +9,7 @@ export interface Options {
 	channel: string;
 
 	reconnection: boolean;
+	reconnectionLimit: number;
 	interval: number;
 	expiresIn: number;
 
