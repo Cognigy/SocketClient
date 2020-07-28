@@ -6,16 +6,13 @@ export interface Options {
 	/** The identifier of the channel on which the client runs */
 	channel: string;
 
-	/** Prevents the client from attempting to reconnect in case the connection is lost */
-	disableReconnect: boolean;
-	/** Sets the interval time inbetween reconnection attempts */
-	reconnectInterval: number;
-	/** Sets a limit on the amount of reconnection attempts */
-	reconnectLimit: number;
-
-	/** Sets an inactivity treshold in miliseconds after which the connection is considered "expired" */
-	expiryLimit: number;
-
 	/** Enables a fallback to HTTP polling instead of websockets */
-	enablePollingFallback: boolean;
+	allowPolling: boolean;
+
+	/** If `true`, prevents the client from attempting to reconnect in case the connection is lost */
+	disableReconnect: boolean;
+	/** Sets the interval time inbetween reconnection attempts in miliseconds */
+	reconnectInterval: number;
+	/** Limits the maximum number of reconnection attempts. `0` means no limit */
+	reconnectLimit: number;
 };

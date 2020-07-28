@@ -16,10 +16,7 @@ const { SocketClient } = require('@cognigy/socket-client');
 
 (async () => {
     // create a client instance with a socket url and an url token
-    const client = new SocketClient('https://socket.url', 'socket-token', {
-      // if you use node, internet explorer or safari, you need to enforce websockets
-      forceWebsockets: true
-    });
+    const client = new SocketClient('https://socket.url', 'socket-token');
 
     // register a handler for messages
     client.on('output', output => {
@@ -63,11 +60,11 @@ const client = new SocketClient('https://socket.url', 'socket-token', {
 
 | Name | Type | Default | Description '
 | - | - | - | - |
-| `userId` | string | random string | the user id for the conversation
-| `sessionId` | string | random string | the session id for the conversation
-| `channel` | string | `"socket-client"` | the name of the channel (can be used for analytics purposes)
-| `forceWebsockets` | boolean | `false` | if this is enabled, there will be no fallback to http polling
-| `interval` | number | `10000` | the interval for polling if in http polling fallback
-| `reconnection` | boolean | `true` | if enabled, will try to reconnect if the connection is aborted
-| `reconnectionLimit` | number | `5` | limit the maximum number of reconnection attempts, `0` means no limit
+| `userId` | string | random string | User ID of the corresponding Contact Profile
+| `sessionId` | string | random string | The current session for this user. Used to generate unique sessions for a user on each new "connect"
+| `channel` | string | `"socket-client"` | The identifier of the channel on which the client runs
+| `allowPolling` | boolean | `false` | Enables a fallback to HTTP polling instead of websockets
+| `disableReconnect` | boolean | `false` | If `true`, prevents the client from attempting to reconnect in case the connection is lost
+| `reconnectInterval` | number | `10000` | Sets the interval time inbetween reconnection attempts in miliseconds
+| `reconnectLimit` | number | `5` | Limits the maximum number of reconnection attempts. `0` means no limit
 

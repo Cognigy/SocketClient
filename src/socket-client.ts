@@ -17,7 +17,6 @@ export class SocketClient extends EventEmitter {
     private reconnectCounter: number;
 
     private messageBuffer: Input[] = [];
-    private lastUsed: number;
 
     private static createDefaultSocketOptions(): Options {
         return {
@@ -30,9 +29,7 @@ export class SocketClient extends EventEmitter {
             reconnectInterval: 10000,
             reconnectLimit: 5,
             
-            expiryLimit: null,
-            
-            enablePollingFallback: false,
+            allowPolling: false,
         }
     }
 
@@ -52,8 +49,6 @@ export class SocketClient extends EventEmitter {
         this.socketURLToken = socketToken;
         this.socketOptions = SocketClient.completeSocketOptions(options);
         this.reconnectCounter = 0;
-
-        this.updateLastUsed();
     }
 
     private resetReconnectionCounter() {
@@ -110,10 +105,6 @@ export class SocketClient extends EventEmitter {
         }
     }
 
-    private updateLastUsed() {
-        this.lastUsed = Date.now();
-    }
-
 
 
     get connected(): boolean {
@@ -122,15 +113,6 @@ export class SocketClient extends EventEmitter {
 
         return this.socket.connected;
     }
-
-    get expired(): boolean {
-        if (this.socketOptions.expiryLimit === null)
-            return false;
-
-        return (Date.now() - this.lastUsed) > this.socketOptions.expiryLimit;
-    }
-
-
 
     public async connect(): Promise<any> {
         const parsedUrl = new URL(this.socketUrl);
@@ -141,7 +123,7 @@ export class SocketClient extends EventEmitter {
             path,
             reconnection: false,
             upgrade: true,
-            transports: this.socketOptions.enablePollingFallback
+            transports: this.socketOptions.allowPolling
                 ? ["polling", "websocket"]
                 : ["websocket"]
         });
@@ -223,7 +205,6 @@ export class SocketClient extends EventEmitter {
     public sendMessage(text: string, data?: any): SocketClient {
         if (this.connected) {
             this.resetReconnectionCounter();
-            this.updateLastUsed();
 
             /* Send the processInput event to the endpoint */
             this.socket.emit("processInput", {
