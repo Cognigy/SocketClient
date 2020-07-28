@@ -10,14 +10,14 @@
     "build": "tsc"
   },
   "dependencies": {
-    "socket.io-client": "^2.2.0",
+    "socket.io-client": "^2.3.0",
     "url": "^0.11.0",
-    "uuid": "^3.3.2"
+    "uuid": "^3.4.0"
   },
   "devDependencies": {
-    "@types/node": "^12.7.1",
-    "@types/socket.io-client": "^1.4.32",
-    "@types/uuid": "^3.4.4",
-    "typescript": "^3.4.5"
+    "@types/node": "^12.12.53",
+    "@types/socket.io-client": "^1.4.33",
+    "@types/uuid": "^3.4.9",
+    "typescript": "^3.9.7"
   }
 }
