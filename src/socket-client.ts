@@ -6,7 +6,6 @@ import { IOutput } from "./interfaces/output";
 import { IProcessReplyPayload } from "./interfaces/output";
 import { Input } from "./interfaces/input";
 import { ITypingStatusPayload } from "./interfaces/typingStatus";
-import { shouldForceWebsockets } from "./helper/compatibility";
 
 export class SocketClient extends EventEmitter {
     public socketUrl: string;
@@ -20,28 +19,20 @@ export class SocketClient extends EventEmitter {
     private messageBuffer: Input[] = [];
     private lastUsed: number;
 
-
-
     private static createDefaultSocketOptions(): Options {
         return {
-            channel: 'socket-client',
             userId: `user-${uuid()}`,
             sessionId: `session-${uuid()}`,
+            channel: 'socket-client',
 
             // connection behaviour
-            expiresIn: null,
-            forceWebsockets: shouldForceWebsockets(),
-            interval: 10000,
-            passthroughIP: null,
-            reconnection: true,
-            reconnectionLimit: 5,
-
-            // optional brain commands
-            // TODO remove if possible
-            reloadFlow: false,
-            resetContext: false,
-            resetFlow: false,
-            resetState: false,
+            disableReconnect: false,
+            reconnectInterval: 10000,
+            reconnectLimit: 5,
+            
+            expiryLimit: null,
+            
+            enablePollingFallback: false,
         }
     }
 
@@ -81,9 +72,9 @@ export class SocketClient extends EventEmitter {
     }
 
     private shouldStopReconnecting(): boolean {
-        const { reconnectionLimit } = this.socketOptions;
+        const { reconnectLimit } = this.socketOptions;
 
-        return (reconnectionLimit !== 0) && (reconnectionLimit <= this.reconnectCounter);
+        return (reconnectLimit !== 0) && (reconnectLimit <= this.reconnectCounter);
     }
 
 
@@ -115,7 +106,7 @@ export class SocketClient extends EventEmitter {
                         console.error(`[SocketClient] Failed to reconnect, error was: ${JSON.stringify(err)}`);
                     };
                 }
-            }, this.socketOptions.interval);
+            }, this.socketOptions.reconnectInterval);
         }
     }
 
@@ -133,10 +124,10 @@ export class SocketClient extends EventEmitter {
     }
 
     get expired(): boolean {
-        if (this.socketOptions.expiresIn === null)
+        if (this.socketOptions.expiryLimit === null)
             return false;
 
-        return (Date.now() - this.lastUsed) > this.socketOptions.expiresIn;
+        return (Date.now() - this.lastUsed) > this.socketOptions.expiryLimit;
     }
 
 
@@ -150,9 +141,9 @@ export class SocketClient extends EventEmitter {
             path,
             reconnection: false,
             upgrade: true,
-            transports: this.socketOptions.forceWebsockets
-                ? ["websocket"]
-                : ["polling", "websocket"]
+            transports: this.socketOptions.enablePollingFallback
+                ? ["polling", "websocket"]
+                : ["websocket"]
         });
 
         // forward Socket.IO events
@@ -209,7 +200,7 @@ export class SocketClient extends EventEmitter {
                 this.flushMessageBuffer();
 
                 // if configured, initialize automatic reconnect attempts
-                if (this.socketOptions.reconnection)
+                if (!this.socketOptions.disableReconnect)
                     this.setupReconnectInterval();
 
                 resolve(this);
@@ -241,11 +232,6 @@ export class SocketClient extends EventEmitter {
                 sessionId: this.socketOptions.sessionId,
                 channel: this.socketOptions.channel,
                 source: "device",
-                passthroughIP: this.socketOptions.passthroughIP,
-                reloadFlow: !!this.socketOptions.reloadFlow,
-                resetFlow: !!this.socketOptions.resetFlow,
-                resetState: !!this.socketOptions.resetState,
-                resetContext: !!this.socketOptions.resetContext,
                 text,
                 data,
             });
