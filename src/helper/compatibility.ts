@@ -15,6 +15,10 @@ export const shouldForceWebsockets = () => {
         // Safari
         case 'safari':
 
+        // Chrome
+        case 'chrome':
+        case 'chromium-webview':
+
         // NodeJS
         case 'node':
             console.log("[SocketClient] Enabling \"forceWebsockets\" by default for compatibility with this environment.");
