@@ -35,6 +35,7 @@ const { SocketClient } = require('@cognigy/socket-client');
     client.sendMessage('', { color: 'green' });
 })()
 ```
+> In case you are using TypeScript in a frontend codebase, you may need to manually install `@types/node` to avoid transpilation errors regarding event-related code parts like e.g. `client.on()` 
 
 ## Socket Events
 You can subscribe to the following events from the `SocketClient`:
