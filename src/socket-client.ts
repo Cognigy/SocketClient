@@ -178,8 +178,6 @@ export class SocketClient extends EventEmitter {
             connectOptions.upgrade = false;
         }
 
-        console.log(this.socketOptions, connectOptions);
-
         const socket = SocketIOClient.connect(parsedUrl.origin, connectOptions);
 
         // forward Socket.IO events
