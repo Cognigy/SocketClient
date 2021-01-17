@@ -20,8 +20,12 @@ export interface Options {
 
 	passthroughIP?: string;
 
-	/**
+	/** 
 	 * Whether to force a websocket connection.
+	 * Will win over "forcePolling" if both are set to true.
 	 */
 	forceWebsockets: boolean;
+
+	/** Whether to force HTTP polling */
+	forcePolling: boolean;
 };
