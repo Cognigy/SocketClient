@@ -55,7 +55,7 @@ export class SocketClient extends EventEmitter {
         /**
          * If no explicit polling or websockets flag was set,
          * decide implicitly on whether to force websockets
-         * based on the runtime enrivonment.
+         * based on the runtime environment.
          */
         if (!options.forceWebsockets && !options.disableWebsockets) {
             mergedOptions.forceWebsockets = shouldForceWebsockets();
