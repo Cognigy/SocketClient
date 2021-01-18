@@ -1,6 +1,6 @@
 {
   "name": "@cognigy/socket-client",
-  "version": "4.4.0",
+  "version": "4.5.0",
   "description": "A client used to connect to Cognigy installations through Socket-Endpoints",
   "author": "Robin Schuster <r.schuster@cognigy.com>",
   "license": "SEE LICENSE IN LICENSE",
