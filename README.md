@@ -72,8 +72,8 @@ const client = new SocketClient("https://socket.url", "socket-token", {
 | `userId`            | string  | random string                          | the user id for the conversation                                                         |
 | `sessionId`         | string  | random string                          | the session id for the conversation                                                      |
 | `channel`           | string  | `"socket-client"`                      | the name of the channel (can be used for analytics purposes)                             |
-| `forceWebsockets`   | boolean | auto-determined by runtime-environment | if this is enabled, there will be no fallback to http polling (wins over `forcePolling`) |
-| `forcePolling`      | boolean | `false`                                | if this is enabled, there will be no upgrade to websockets                               |
+| `forceWebsockets`   | boolean | auto-determined by runtime-environment | if this is enabled, there will be no fallback to http polling (wins over `disableWebsockets`) |
+| `disableWebsockets` | boolean | `false`                                | if this is enabled, there will be no upgrade to websockets                               |
 | `interval`          | number  | `10000`                                | the interval for polling if in http polling fallback                                     |
 | `reconnection`      | boolean | `true`                                 | if enabled, will try to reconnect if the connection is aborted                           |
 | `reconnectionLimit` | number  | `5`                                    | limit the maximum number of reconnection attempts, `0` means no limit                    |

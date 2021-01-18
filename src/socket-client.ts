@@ -31,7 +31,7 @@ export class SocketClient extends EventEmitter {
             // connection behaviour
             expiresIn: null,
             forceWebsockets: false,
-            forcePolling: false,
+            disableWebsockets: false,
             interval: 10000,
             passthroughIP: null,
             reconnection: true,
@@ -57,7 +57,7 @@ export class SocketClient extends EventEmitter {
          * decide implicitly on whether to force websockets
          * based on the runtime enrivonment.
          */
-        if (!options.forceWebsockets && !options.forcePolling) {
+        if (!options.forceWebsockets && !options.disableWebsockets) {
             mergedOptions.forceWebsockets = shouldForceWebsockets();
         }
 
@@ -166,14 +166,15 @@ export class SocketClient extends EventEmitter {
         };
 
         /**
-         * If websockets or polling is forced by flag,
+         * If websockets are forced or disabled,
          * change the transport and upgrade flags accordingly.
          * 
-         * In case both options are provided, websockets win over polling.
+         * In case both options are provided, forcing websockets
+         * wins over disabling websockets.
          */
         if (this.socketOptions.forceWebsockets) {
             connectOptions.transports = ["websocket"];
-        } else if (this.socketOptions.forcePolling) {
+        } else if (this.socketOptions.disableWebsockets) {
             connectOptions.transports = ["polling"];
             connectOptions.upgrade = false;
         }

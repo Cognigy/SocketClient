@@ -26,6 +26,6 @@ export interface Options {
 	 */
 	forceWebsockets: boolean;
 
-	/** Whether to force HTTP polling */
-	forcePolling: boolean;
+	/** Whether to only rely on HTTP polling */
+	disableWebsockets: boolean;
 };
