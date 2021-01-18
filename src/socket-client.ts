@@ -30,7 +30,8 @@ export class SocketClient extends EventEmitter {
 
             // connection behaviour
             expiresIn: null,
-            forceWebsockets: shouldForceWebsockets(),
+            forceWebsockets: false,
+            disableWebsockets: false,
             interval: 10000,
             passthroughIP: null,
             reconnection: true,
@@ -46,10 +47,21 @@ export class SocketClient extends EventEmitter {
     }
 
     private static completeSocketOptions(options: Partial<Options> = {}): Options {
-        return {
+        const mergedOptions = {
             ...SocketClient.createDefaultSocketOptions(),
             ...options
+        };
+
+        /**
+         * If no explicit polling or websockets flag was set,
+         * decide implicitly on whether to force websockets
+         * based on the runtime environment.
+         */
+        if (!options.forceWebsockets && !options.disableWebsockets) {
+            mergedOptions.forceWebsockets = shouldForceWebsockets();
         }
+
+        return mergedOptions;
     }
 
 
@@ -146,14 +158,28 @@ export class SocketClient extends EventEmitter {
         const path = parsedUrl.pathname && parsedUrl.pathname !== "/" ?
             parsedUrl.pathname + "/socket.io" : null;
 
-        const socket = SocketIOClient.connect(parsedUrl.origin, {
+        const connectOptions = {
             path,
             reconnection: false,
             upgrade: true,
-            transports: this.socketOptions.forceWebsockets
-                ? ["websocket"]
-                : ["polling", "websocket"]
-        });
+            transports: ["polling", "websocket"]
+        };
+
+        /**
+         * If websockets are forced or disabled,
+         * change the transport and upgrade flags accordingly.
+         * 
+         * In case both options are provided, forcing websockets
+         * wins over disabling websockets.
+         */
+        if (this.socketOptions.forceWebsockets) {
+            connectOptions.transports = ["websocket"];
+        } else if (this.socketOptions.disableWebsockets) {
+            connectOptions.transports = ["polling"];
+            connectOptions.upgrade = false;
+        }
+
+        const socket = SocketIOClient.connect(parsedUrl.origin, connectOptions);
 
         // forward Socket.IO events
         [
