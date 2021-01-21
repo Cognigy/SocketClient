@@ -121,7 +121,7 @@ export class SocketClient extends EventEmitter {
                 if (!this.connected && !this.shouldStopReconnecting()) {
                     this.registerReconnectionAttempt();
                     try {
-                        await this.connect();
+                        await this.connect(true);
                         console.log(`[SocketClient] Successfully reconnected.`);
                     } catch (err) {
                         console.error(`[SocketClient] Failed to reconnect, error was: ${JSON.stringify(err)}`);
@@ -153,7 +153,7 @@ export class SocketClient extends EventEmitter {
 
 
 
-    public async connect(): Promise<any> {
+    public async connect(isReconnect = false): Promise<any> {
         const parsedUrl = new URL(this.socketUrl);
         const path = parsedUrl.pathname && parsedUrl.pathname !== "/" ?
             parsedUrl.pathname + "/socket.io" : null;
@@ -177,6 +177,17 @@ export class SocketClient extends EventEmitter {
         } else if (this.socketOptions.disableWebsockets) {
             connectOptions.transports = ["polling"];
             connectOptions.upgrade = false;
+        }
+
+        /**
+         * If this is a reconnection attempt,
+         * we send sessionId, userId inside a query parameter
+         */
+        if (isReconnect) {
+            connectOptions["query"] = {
+                sessionId: encodeURIComponent(this.socketOptions.sessionId),
+                userId: encodeURIComponent(this.socketOptions.userId),
+            }
         }
 
         const socket = SocketIOClient.connect(parsedUrl.origin, connectOptions);
