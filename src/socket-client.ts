@@ -121,7 +121,8 @@ export class SocketClient extends EventEmitter {
                 if (!this.connected && !this.shouldStopReconnecting()) {
                     this.registerReconnectionAttempt();
                     try {
-                        await this.connect(true);
+                        const isReconnect = true;
+                        await this.connect(isReconnect);
                         console.log(`[SocketClient] Successfully reconnected.`);
                     } catch (err) {
                         console.error(`[SocketClient] Failed to reconnect, error was: ${JSON.stringify(err)}`);
