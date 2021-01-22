@@ -187,6 +187,7 @@ export class SocketClient extends EventEmitter {
         if (isReconnect) {
             connectOptions["query"] = {
                 sessionId: encodeURIComponent(this.socketOptions.sessionId),
+                urlToken: encodeURIComponent(this.socketURLToken),
                 userId: encodeURIComponent(this.socketOptions.userId),
             }
         }
