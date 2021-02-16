@@ -39,10 +39,7 @@ export class SocketClient extends EventEmitter {
 
             // optional brain commands
             // TODO remove if possible
-            reloadFlow: false,
-            resetContext: false,
             resetFlow: false,
-            resetState: false,
         }
     }
 
