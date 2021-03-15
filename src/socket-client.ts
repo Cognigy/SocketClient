@@ -214,6 +214,7 @@ export class SocketClient extends EventEmitter {
         // pass through basic events
         socket.on("exception", (error: any) => this.emit('exception', error));
         socket.on("typingStatus", (payload: ITypingStatusPayload) => this.emit('typingStatus', payload));   
+        socket.on("finalPing", () => this.emit('finalPing'));   
 
         // decide positive / negative outcome of output based on content
         socket.on("output", (reply: IProcessReplyPayload) => {
@@ -223,12 +224,7 @@ export class SocketClient extends EventEmitter {
 
             if (reply && reply.type === "output") {
                 let output: IOutput = reply.data;
-
                 this.emit('output', output);
-            }
-
-            if (reply && reply.type === "finalPing") {
-                this.emit('finalPing', reply.data)
             }
         });
 
