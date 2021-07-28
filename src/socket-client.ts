@@ -278,10 +278,7 @@ export class SocketClient extends EventEmitter {
                 channel: this.socketOptions.channel,
                 source: "device",
                 passthroughIP: this.socketOptions.passthroughIP,
-                reloadFlow: !!this.socketOptions.reloadFlow,
                 resetFlow: !!this.socketOptions.resetFlow,
-                resetState: !!this.socketOptions.resetState,
-                resetContext: !!this.socketOptions.resetContext,
                 text,
                 data,
             });

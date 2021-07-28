@@ -13,9 +13,6 @@ export interface Options {
 	interval: number;
 	expiresIn: number;
 
-	resetState: boolean;
-	resetContext: boolean;
-	reloadFlow: boolean;
 	resetFlow: boolean;
 
 	passthroughIP?: string;
