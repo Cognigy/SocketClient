@@ -178,15 +178,14 @@ export class SocketClient extends EventEmitter {
         }
 
         /**
-         * If this is a reconnection attempt,
-         * we send sessionId, userId inside a query parameter
+         * Identify this endpoint to the endpoint for session-to-socket mapping.
+         * Without this, the backend cannot "take first steps" because it can't
+         * reach the client!
          */
-        if (isReconnect) {
-            connectOptions["query"] = {
-                sessionId: encodeURIComponent(this.socketOptions.sessionId),
-                urlToken: encodeURIComponent(this.socketURLToken),
-                userId: encodeURIComponent(this.socketOptions.userId),
-            }
+        connectOptions["query"] = {
+            sessionId: encodeURIComponent(this.socketOptions.sessionId),
+            urlToken: encodeURIComponent(this.socketURLToken),
+            userId: encodeURIComponent(this.socketOptions.userId),
         }
 
         const socket = SocketIOClient.connect(parsedUrl.origin, connectOptions);
