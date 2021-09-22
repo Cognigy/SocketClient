@@ -212,7 +212,15 @@ export class SocketClient extends EventEmitter {
 
         // pass through basic events
         socket.on("exception", (error: any) => this.emit('exception', error));
-        socket.on("typingStatus", (payload: ITypingStatusPayload) => this.emit('typingStatus', payload));   
+        socket.on("typingStatus", (payload: ITypingStatusPayload) => this.emit('typingStatus', payload));
+
+        /**
+         * Heads up!
+         * 
+         * On v3 environments, we're publishing the "finalPing" as an "output" event with "type: finalPing",
+         * on v4 environments, we're directly publishing the "finalPing" as a "finalPing" event!
+         */
+        socket.on("finalPing", (reply: any) => this.emit('finalPing', reply));
 
         // decide positive / negative outcome of output based on content
         socket.on("output", (reply: IProcessReplyPayload) => {
