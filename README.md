@@ -1,7 +1,7 @@
 # Cognigy Socket Client
 
 This package is used to create a connection to Cognigy.AI via a Socket Endpoint.  
-You can read about setting up a Socket Endpoint in [our platform documentation](https://docs.cognigy.com/docs/deploy-a-socket-endpoint)
+You can read about setting up a Socket Endpoint in [our platform documentation](https://docs.cognigy.com/ai/endpoints/socketio/)
 
 ## Installation
 
