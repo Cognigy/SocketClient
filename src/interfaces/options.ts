@@ -25,4 +25,6 @@ export interface Options {
 
 	/** Whether to only rely on HTTP polling */
 	disableWebsockets: boolean;
+
+	enableInnerSocketHandshake: boolean;
 };

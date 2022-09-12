@@ -40,6 +40,7 @@ export class SocketClient extends EventEmitter {
             // optional brain commands
             // TODO remove if possible
             resetFlow: false,
+            enableInnerSocketHandshake: false
         }
     }
 
@@ -160,7 +161,8 @@ export class SocketClient extends EventEmitter {
             path,
             reconnection: false,
             upgrade: true,
-            transports: ["polling", "websocket"]
+            transports: ["polling", "websocket"],
+            autoConnect: false
         };
 
         /**
@@ -177,18 +179,24 @@ export class SocketClient extends EventEmitter {
             connectOptions.upgrade = false;
         }
 
-        /**
-         * Identify this endpoint to the endpoint for session-to-socket mapping.
-         * Without this, the backend cannot "take first steps" because it can't
-         * reach the client!
-         */
-        connectOptions["query"] = {
-            sessionId: encodeURIComponent(this.socketOptions.sessionId),
-            urlToken: encodeURIComponent(this.socketURLToken),
-            userId: encodeURIComponent(this.socketOptions.userId),
+        if (!this.socketOptions.enableInnerSocketHandshake) {
+            /**
+             * Identify this endpoint to the endpoint for session-to-socket mapping.
+             * Without this, the backend cannot "take first steps" because it can't
+             * reach the client!
+             */
+            connectOptions["query"] = {
+                sessionId: encodeURIComponent(this.socketOptions.sessionId),
+                urlToken: encodeURIComponent(this.socketURLToken),
+                userId: encodeURIComponent(this.socketOptions.userId),
+            }
+        } else {
+            connectOptions["query"] = {
+                handshake: "true"
+            }
         }
 
-        const socket = SocketIOClient.connect(parsedUrl.origin, connectOptions);
+        const socket = SocketIOClient(parsedUrl.origin, connectOptions);
 
         // forward Socket.IO events
         [
@@ -239,6 +247,25 @@ export class SocketClient extends EventEmitter {
             }
         });
 
+        socket.on("handshake", (cb: Function) => {
+            console.log('got handshake')
+            const { 
+                userId,
+                sessionId,
+            } = this.socketOptions;
+
+            const urlToken = this.socketURLToken;
+
+            const options = {
+                userId,
+                sessionId,
+                urlToken
+            }
+
+            console.log('calling handshake callback', options);
+            cb(options);
+        });
+
 
         // return success based on connection status
         return new Promise((resolve, reject) => {
@@ -257,6 +284,8 @@ export class SocketClient extends EventEmitter {
 
                 resolve(this);
             });
+
+            socket.connect();
         });
     }
 
