@@ -67,13 +67,14 @@ const client = new SocketClient("https://socket.url", "socket-token", {
 });
 ```
 
-| Name                | Type    | Default                                | Description '                                                                                                             |
-| ------------------- | ------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `userId`            | string  | random string                          | the user id for the conversation                                                                                          |
-| `sessionId`         | string  | random string                          | the session id for the conversation                                                                                       |
-| `channel`           | string  | `"socket-client"`                      | the name of the channel (can be used for analytics purposes)                                                              |
-| `forceWebsockets`   | boolean | auto-determined by runtime-environment | If this is enabled, the client will only use websockets and not fall back to http polling (wins over `disableWebsockets`) |
-| `disableWebsockets` | boolean | `false`                                | If this is enabled, the client will only use http polling and will not try to upgrade to websockets                       |
-| `interval`          | number  | `10000`                                | the interval for polling if in http polling fallback                                                                      |
-| `reconnection`      | boolean | `true`                                 | if enabled, will try to reconnect if the connection is aborted                                                            |
-| `reconnectionLimit` | number  | `5`                                    | limit the maximum number of reconnection attempts, `0` means no limit                                                     |
+| Name                         | Type    | Default                                | Description '                                                                                                                              |
+| ---------------------------- | ------- | -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `userId`                     | string  | random string                          | the user id for the conversation                                                                                                           |
+| `sessionId`                  | string  | random string                          | the session id for the conversation                                                                                                        |
+| `channel`                    | string  | `"socket-client"`                      | the name of the channel (can be used for analytics purposes)                                                                               |
+| `forceWebsockets`            | boolean | auto-determined by runtime-environment | If this is enabled, the client will only use websockets and not fall back to http polling (wins over `disableWebsockets`)                  |
+| `disableWebsockets`          | boolean | `false`                                | If this is enabled, the client will only use http polling and will not try to upgrade to websockets                                        |
+| `interval`                   | number  | `10000`                                | the interval for polling if in http polling fallback                                                                                       |
+| `reconnection`               | boolean | `true`                                 | if enabled, will try to reconnect if the connection is aborted                                                                             |
+| `reconnectionLimit`          | number  | `5`                                    | limit the maximum number of reconnection attempts, `0` means no limit                                                                      |
+| `enableInnerSocketHandshake` | boolean | `false`                                | If this is enabled, the session parameters (userId, sessionId, urlToken) will be transferred through the websocket instead of query params |

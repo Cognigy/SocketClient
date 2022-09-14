@@ -36,11 +36,11 @@ export class SocketClient extends EventEmitter {
             passthroughIP: null,
             reconnection: true,
             reconnectionLimit: 5,
+            enableInnerSocketHandshake: false,
 
             // optional brain commands
             // TODO remove if possible
             resetFlow: false,
-            enableInnerSocketHandshake: false
         }
     }
 
@@ -191,6 +191,15 @@ export class SocketClient extends EventEmitter {
                 userId: encodeURIComponent(this.socketOptions.userId),
             }
         } else {
+            /**
+             * Instructs the backend to emit a "handshake" event
+             * as soon as the connection is established.
+             * The client will answer that handshake in a handler
+             * set up below.
+             * 
+             * This way, userId, sessionId and urlToken are not visible
+             * to an interceptor!
+             */
             connectOptions["query"] = {
                 handshake: "true"
             }
@@ -253,27 +262,38 @@ export class SocketClient extends EventEmitter {
             socket.on("connect_error", () => reject(new Error("[SocketClient] Error connecting")));
             socket.on("connect_timeout", () => reject(new Error("[SocketClient] Error connecting")));
 
-            socket.on("handshake", (cb: Function) => {
-                const { 
-                    userId,
-                    sessionId,
-                } = this.socketOptions;
-    
-                const urlToken = this.socketURLToken;
-    
-                const options = {
-                    userId,
-                    sessionId,
-                    urlToken
-                }
-
-                console.log("[SocketClient] answering session handshake");
-                cb(options);
-
-                if (this.socketOptions.enableInnerSocketHandshake) {
+            /**
+             * If the "inner socket handshake" is enabled,
+             * we're expecting a "handshake" event in response to the
+             * initial connection.
+             * 
+             * We will answer this handshake event with our
+             * session parameters that we'd otherwise have sent
+             * through the query parameters.
+             * 
+             * As soon as the handshake is answered, the connection
+             * can be seen as "established"
+             */
+            if (this.socketOptions.enableInnerSocketHandshake) {
+                socket.on("handshake", (cb: Function) => {
+                    const { 
+                        userId,
+                        sessionId,
+                    } = this.socketOptions;
+        
+                    const urlToken = this.socketURLToken;
+                    
+                    const options = {
+                        userId,
+                        sessionId,
+                        urlToken
+                    }
+                    
+                    console.log("[SocketClient] completing session handshake");
+                    cb(options);
                     resolve();
-                }
-            });
+                });
+            }
 
             socket.on("connect", () => {
                 this.socket = socket;
@@ -284,9 +304,16 @@ export class SocketClient extends EventEmitter {
                 if (this.socketOptions.reconnection)
                     this.setupReconnectInterval();
 
+                /**
+                 * If "inner socket handshake" is enabled, the connection
+                 * isn't "fully established" until the backend learnt
+                 * about the session parameters!
+                 */
                 if (!this.socketOptions.enableInnerSocketHandshake) {
-                    resolve();
+                    return;
                 }
+
+                resolve();
             });
 
             socket.connect();

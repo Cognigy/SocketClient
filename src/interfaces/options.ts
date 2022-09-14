@@ -26,5 +26,11 @@ export interface Options {
 	/** Whether to only rely on HTTP polling */
 	disableWebsockets: boolean;
 
+	/** 
+	 * If this is enabled, the session parameters
+	 * (userId, sessionId, urlToken) will be transferred
+	 * via a handshake through the socket rather than
+	 * via query parameters.
+	 */
 	enableInnerSocketHandshake: boolean;
 };
