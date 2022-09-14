@@ -247,33 +247,35 @@ export class SocketClient extends EventEmitter {
             }
         });
 
-        socket.on("handshake", (cb: Function) => {
-            console.log('got handshake')
-            const { 
-                userId,
-                sessionId,
-            } = this.socketOptions;
-
-            const urlToken = this.socketURLToken;
-
-            const options = {
-                userId,
-                sessionId,
-                urlToken
-            }
-
-            console.log('calling handshake callback', options);
-            cb(options);
-        });
-
 
         // return success based on connection status
-        return new Promise((resolve, reject) => {
+        await new Promise<void>((resolve, reject) => {
             socket.on("connect_error", () => reject(new Error("[SocketClient] Error connecting")));
             socket.on("connect_timeout", () => reject(new Error("[SocketClient] Error connecting")));
 
+            socket.on("handshake", (cb: Function) => {
+                const { 
+                    userId,
+                    sessionId,
+                } = this.socketOptions;
+    
+                const urlToken = this.socketURLToken;
+    
+                const options = {
+                    userId,
+                    sessionId,
+                    urlToken
+                }
+
+                console.log("[SocketClient] answering session handshake");
+                cb(options);
+
+                if (this.socketOptions.enableInnerSocketHandshake) {
+                    resolve();
+                }
+            });
+
             socket.on("connect", () => {
-                console.log("[SocketClient] connection established");
                 this.socket = socket;
 
                 this.flushMessageBuffer();
@@ -282,11 +284,16 @@ export class SocketClient extends EventEmitter {
                 if (this.socketOptions.reconnection)
                     this.setupReconnectInterval();
 
-                resolve(this);
+                if (!this.socketOptions.enableInnerSocketHandshake) {
+                    resolve();
+                }
             });
 
             socket.connect();
         });
+
+        console.log("[SocketClient] connection established");
+        return this;
     }
 
     public disconnect(): SocketClient {
