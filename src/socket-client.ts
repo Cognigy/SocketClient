@@ -309,7 +309,7 @@ export class SocketClient extends EventEmitter {
                  * isn't "fully established" until the backend learnt
                  * about the session parameters!
                  */
-                if (!this.socketOptions.enableInnerSocketHandshake) {
+                if (this.socketOptions.enableInnerSocketHandshake) {
                     return;
                 }
 
