@@ -27,6 +27,7 @@ export class SocketClient extends EventEmitter {
             channel: 'socket-client',
             userId: `user-${uuid()}`,
             sessionId: `session-${uuid()}`,
+            testMode: false,
 
             // connection behaviour
             expiresIn: null,
@@ -189,6 +190,7 @@ export class SocketClient extends EventEmitter {
                 sessionId: encodeURIComponent(this.socketOptions.sessionId),
                 urlToken: encodeURIComponent(this.socketURLToken),
                 userId: encodeURIComponent(this.socketOptions.userId),
+                testMode: encodeURIComponent(this.socketOptions.testMode ? "true" : "false"),
             }
         } else {
             /**
@@ -276,19 +278,21 @@ export class SocketClient extends EventEmitter {
              */
             if (this.socketOptions.enableInnerSocketHandshake) {
                 socket.on("handshake", (cb: Function) => {
-                    const { 
+                    const {
                         userId,
                         sessionId,
+                        testMode
                     } = this.socketOptions;
-        
+
                     const urlToken = this.socketURLToken;
-                    
+
                     const options = {
                         userId,
                         sessionId,
-                        urlToken
+                        urlToken,
+                        testMode
                     }
-                    
+
                     console.log("[SocketClient] completing session handshake");
                     cb(options);
                     resolve();
