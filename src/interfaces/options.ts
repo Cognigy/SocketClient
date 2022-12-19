@@ -28,9 +28,16 @@ export interface Options {
 
 	/** 
 	 * If this is enabled, the session parameters
-	 * (userId, sessionId, urlToken) will be transferred
+	 * (userId, sessionId, urlToken, testMode) will be transferred
 	 * via a handshake through the socket rather than
 	 * via query parameters.
 	 */
 	enableInnerSocketHandshake: boolean;
+
+	/**
+	 * If this is enabled, the testMode=true query parameter will be passed
+	 * to socket connection. And Socket.io endpoint will accepts messages as
+	 * test messages without increasing the billable conversation count.
+	 */
+	testMode: boolean;
 };
