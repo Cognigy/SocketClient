@@ -1,3 +1,5 @@
+import { IMessageData } from "./messageData";
+
 export interface IProcessReplyPayload {
 	type: "output" | "finalPing" | "error";
 	data: IProcessOutputData;
@@ -17,5 +19,5 @@ export interface IProcessOutputData {
 
 export interface IOutput {
 	text?: string;
-	data?: { [key: string]: any };
+	data?: IMessageData;
 }
