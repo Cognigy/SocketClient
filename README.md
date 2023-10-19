@@ -52,8 +52,9 @@ client.on("finalPing", () => {
 
 | Name         | Event Payload     | Description                                         |
 | ------------ | ----------------- | --------------------------------------------------- |
-| output       | `{ text, data }`  | fires on every incoming message from the bot        |
-| typingStatus | `"on"` or `"off"` | fires when the typing indicator should show or hide |
+| output       | `{ text: string, data: IMessageData }`  | fires on every incoming message from the bot        |
+| processInput       | `{ text: string }`  | fires on a message sent by the user        |
+| typingStatus | `{status: "typingOn" \| "typingOff"}` | fires when the typing indicator should show or hide |
 | finalPing    | -                 | fires when the bot is done processing a message     |
 | error        | `{ message }`     | fires when an error happened in the bot             |
 

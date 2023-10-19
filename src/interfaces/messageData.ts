@@ -1,3 +1,4 @@
+import { IAdaptiveCard } from 'adaptivecards';
 
 
 export interface IMessageData {
@@ -6,7 +7,7 @@ export interface IMessageData {
 
 export interface ICognigyData {
 	_default?: IDefaultMessage;
-	_webchat?: IWebchatMessage | IAdaptiveCard;
+	_webchat?: IWebchatMessage | IAdaptiveCardMessage;
 	_plugin?: unknown;
 	_facebook?: IWebchatMessage;
 	syncWebchatWithFacebook?: boolean;
@@ -26,7 +27,7 @@ export interface IDefaultMessage {
 	_audio?: IDefaultAudio;
 	_image?: IDefaultImage;
 	_video?: IDefaultVideo;
-	_adaptiveCard?: IAdaptiveCard;
+	_adaptiveCard?: IAdaptiveCardMessage;
 };
 
 export interface IDefaultQuickReplies {
@@ -108,9 +109,9 @@ export interface IDefaultVideo {
 	videoAltText: string;
 }
 
-export interface IAdaptiveCard {
+export interface IAdaptiveCardMessage {
 	type: "adaptiveCard";
-	adaptiveCard: unknown;
+	adaptiveCard: IAdaptiveCard;
 }
 
 /**
