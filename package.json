@@ -1,6 +1,6 @@
 {
   "name": "@cognigy/socket-client",
-"version": "5.0.0-beta.1",
+  "version": "5.0.0-beta.1",
   "description": "A client used to connect to Cognigy installations through Socket-Endpoints",
   "author": "Robin Schuster <r.schuster@cognigy.com>",
   "license": "SEE LICENSE IN LICENSE",
@@ -12,14 +12,13 @@
   "dependencies": {
     "detect-browser": "^4.8.0",
     "socket.io-client": "4.7.2",
-    "url": "^0.11.0",
-    "uuid": "^3.3.2"
+    "url": "0.11.3",
+    "uuid": "9.0.1"
   },
   "devDependencies": {
     "@types/node": "^12.19.14",
-    "@types/socket.io-client": "^1.4.32",
-    "@types/uuid": "^3.4.4",
+    "@types/uuid": "9.0.6",
     "adaptivecards": "3.0.1",
-    "typescript": "^3.4.5"
+    "typescript": "5.2.2"
   }
 }

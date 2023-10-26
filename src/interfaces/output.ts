@@ -8,7 +8,7 @@ export interface IProcessReplyPayload {
 export interface IProcessOutputData {
 	// if 'type' is 'output'
 	text?: string;
-	data?: { [key: string]: any };
+	data?: IMessageData;
 
 	// if 'type' is 'finalPing'
 	type?: "regular" | "cognigyStopFlow";

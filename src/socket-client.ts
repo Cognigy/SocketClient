@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import * as SocketIOClient from "socket.io-client";
+import { io as SocketIOClient, Socket } from "socket.io-client";
 import { v4 as uuid } from 'uuid';
 import { Options } from "./interfaces/options";
 import { IOutput } from "./interfaces/output";
@@ -13,7 +13,7 @@ export class SocketClient extends EventEmitter {
     public socketURLToken: string;
     public socketOptions: Options;
 
-    private socket: SocketIOClient.Socket;
+	private socket: Socket;
     private socketReconnectInterval: NodeJS.Timeout;
     private reconnectCounter: number;
 
