@@ -372,3 +372,5 @@ export class SocketClient extends EventEmitter {
         return this;
     }
 }
+
+export { IOutput } from "./interfaces/output";
