@@ -186,7 +186,7 @@ export interface IWebchatAttachmentElement {
 	subtitle: string;
 	image_url: string;
 	image_alt_text?: string;
-	buttons: IWebchatButton[];
+	buttons?: IWebchatButton[] | null;
 	default_action?: {
 		type: string;
 		url?: string;
