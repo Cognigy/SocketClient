@@ -1,5 +1,15 @@
 import { IAdaptiveCard } from 'adaptivecards';
 
+export interface IMessage {
+	text?: string | null;
+	data?: IMessageData;
+	source?: "user" | "bot" | "engagement" | "agent";
+	timestamp?: string;
+	avatarUrl?: string;
+	avatarName?: string;
+	disableSensitiveLogging?: boolean;
+	traceId?: string;
+};
 
 export interface IMessageData {
 	_cognigy: ICognigyData;
@@ -69,7 +79,7 @@ export interface IDefaultItem {
 	title: string;
 	subtitle: string;
 	imageUrl: string;
-	buttons: IDefaultButton[];
+	buttons?: IDefaultButton[] | null;
 	imageAltText?: string;
 }
 
@@ -101,6 +111,7 @@ export interface IDefaultImage {
 	type: "image";
 	imageUrl: string;
 	imageAltText: string;
+	buttons?: IWebchatButton[] | null;
 }
 
 export interface IDefaultVideo {
@@ -139,7 +150,7 @@ export interface IWebchatTemplateAttachment {
 	payload: {
 		template_type: "generic" | "button" | "list";
 		elements?: IWebchatAttachmentElement[];
-		buttons?: IWebchatButton[];
+		buttons?: IWebchatButton[] | null;
 		text?: string;
 		top_element_style?: "compact" | "large" | boolean;
 	};
@@ -158,6 +169,7 @@ export interface IWebchatImageAttachment {
 	payload: {
 		url: string;
 		altText: string;
+		buttons?: IWebchatButton[] | null;
 	};
 }
 

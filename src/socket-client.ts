@@ -374,3 +374,14 @@ export class SocketClient extends EventEmitter {
 }
 
 export { IOutput } from "./interfaces/output";
+export {
+    IMessage,
+    IWebchatMessage,
+    IWebchatButton,
+    IWebchatQuickReply,
+    IWebchatAttachmentElement,
+    IWebchatTemplateAttachment,
+    IWebchatAudioAttachment,
+    IWebchatImageAttachment,
+    IWebchatVideoAttachment,
+} from "./interfaces/messageData";
