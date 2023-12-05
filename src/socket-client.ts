@@ -327,6 +327,18 @@ export class SocketClient extends EventEmitter {
         return this;
     }
 
+    public async switchSessionId(sessionId: string): Promise<SocketClient> {
+        if (!sessionId) return this;
+        
+        this.disconnect();
+        this.socketOptions['sessionId'] = sessionId;
+        this.reconnectCounter = 0;
+        this.updateLastUsed();
+        await this.connect();
+
+        return this;
+    }
+
     public disconnect(): SocketClient {
         clearInterval(this.socketReconnectInterval);
         this.socketReconnectInterval = null;
