@@ -21,6 +21,7 @@ export interface ICognigyData {
 	_plugin?: unknown;
 	_facebook?: IWebchatMessage;
 	syncWebchatWithFacebook?: boolean;
+	controlCommands?: ISetRatingControlCommand
 }
 
 export type TButtonType = "postback" | "web_url" | "phone_number";
@@ -201,4 +202,13 @@ export interface IWebchatButton {
 	webview_height_ratio?: string;
 	messenger_extensions?: boolean;
 	target?: "_blank" | "_self";
+}
+
+export interface ISetRatingControlCommand {
+	type: "setRating";
+	parameters: {
+		rating: number;
+		comment?: string;
+		showRatingStatus?: boolean;
+	};
 }
