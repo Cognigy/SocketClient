@@ -19,7 +19,7 @@ interface ISetRatingControlCommand {
 	type: "setRating";
 	parameters: {
 		rating: number;
-		comment: string;
+		comment?: string;
 		showRatingStatus?: boolean;
 	};
 }
