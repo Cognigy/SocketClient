@@ -15,12 +15,22 @@ export interface IMessageData {
 	_cognigy: ICognigyData;
 }
 
+interface ISetRatingControlCommand {
+	type: "setRating";
+	parameters: {
+		rating: number;
+		comment: string;
+		showRatingStatus?: boolean;
+	};
+}
+
 export interface ICognigyData {
 	_default?: IDefaultMessage;
 	_webchat?: IWebchatMessage | IAdaptiveCardMessage;
 	_plugin?: unknown;
 	_facebook?: IWebchatMessage;
 	syncWebchatWithFacebook?: boolean;
+	controlCommands?: ISetRatingControlCommand
 }
 
 export type TButtonType = "postback" | "web_url" | "phone_number";
