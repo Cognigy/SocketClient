@@ -15,15 +15,6 @@ export interface IMessageData {
 	_cognigy: ICognigyData;
 }
 
-interface ISetRatingControlCommand {
-	type: "setRating";
-	parameters: {
-		rating: number;
-		comment?: string;
-		showRatingStatus?: boolean;
-	};
-}
-
 export interface ICognigyData {
 	_default?: IDefaultMessage;
 	_webchat?: IWebchatMessage | IAdaptiveCardMessage;
@@ -211,4 +202,13 @@ export interface IWebchatButton {
 	webview_height_ratio?: string;
 	messenger_extensions?: boolean;
 	target?: "_blank" | "_self";
+}
+
+export interface ISetRatingControlCommand {
+	type: "setRating";
+	parameters: {
+		rating: number;
+		comment?: string;
+		showRatingStatus?: boolean;
+	};
 }
