@@ -22,7 +22,7 @@ export interface ICognigyData {
 	_plugin?: unknown;
 	_facebook?: IWebchatMessage;
 	syncWebchatWithFacebook?: boolean;
-	controlCommands?: ISetRatingControlCommand
+	controlCommands?: ISetRatingControlCommand[];
 }
 
 export interface IPluginDatepicker {
