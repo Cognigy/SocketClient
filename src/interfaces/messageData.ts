@@ -13,7 +13,7 @@ export interface IMessage {
 
 export interface IMessageData {
 	_cognigy?: ICognigyData;
-	_plugin?: IPluginDatepicker | IPluginDefault;
+	_plugin?: IPluginDatepicker; // TODO: add all plugins we have
 }
 
 export interface ICognigyData {
@@ -51,11 +51,6 @@ export interface IPluginDatepicker {
 		noCalendar?: boolean;
 		weekNumbers?: boolean;
 	};
-}
-
-export interface IPluginDefault {
-	type: "default";
-	data: object;
 }
 
 export type TButtonType = "postback" | "web_url" | "phone_number";
