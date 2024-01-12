@@ -12,7 +12,8 @@ export interface IMessage {
 };
 
 export interface IMessageData {
-	_cognigy: ICognigyData;
+	_cognigy?: ICognigyData;
+	_plugin?: IPluginDatepicker | IPluginDefault;
 }
 
 export interface ICognigyData {
@@ -22,6 +23,39 @@ export interface ICognigyData {
 	_facebook?: IWebchatMessage;
 	syncWebchatWithFacebook?: boolean;
 	controlCommands?: ISetRatingControlCommand
+}
+
+export interface IPluginDatepicker {
+	type: "date-picker";
+	data: {
+		eventName?: string;
+		locale?: string;
+		enableTime?: string | boolean;
+		defaultDate?: string,
+		mode?: "range" | "single" | "multiple";
+		wantDisable?: string | boolean;
+		enable_disable?: string[] | boolean | null;
+		function_enable_disable?: string;
+		minDate?: string;
+		maxDate?: string;
+		openPickerButtonText?: string;
+		cancelButtonText?: string;
+		submitButtonText?: string;
+		time_24hr?: string | boolean;
+		dateFormat?: string;
+		defaultHour?: number;
+		defaultMinute?: number;
+		enableSeconds?: number;
+		hourIncrement?: number;
+		minuteIncrement?: number;
+		noCalendar?: boolean;
+		weekNumbers?: boolean;
+	};
+}
+
+export interface IPluginDefault {
+	type: "default";
+	data: object;
 }
 
 export type TButtonType = "postback" | "web_url" | "phone_number";
