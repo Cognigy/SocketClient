@@ -327,15 +327,14 @@ export class SocketClient extends EventEmitter {
         return this;
     }
 
-    public async switchSessionId(sessionId: string): Promise<SocketClient> {
-        if (!sessionId) return this;
-        
+    public async switchSession(sessionId: string): Promise<SocketClient> {
         this.disconnect();
-        this.socketOptions['sessionId'] = sessionId;
+        this.socketOptions['sessionId'] = sessionId || `session-${uuid()}`;
         this.reconnectCounter = 0;
         this.updateLastUsed();
         await this.connect();
 
+        console.log("[SocketClient] switched session");
         return this;
     }
 
