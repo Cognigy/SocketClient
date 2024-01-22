@@ -1,12 +1,21 @@
 import { IAdaptiveCard } from 'adaptivecards';
 
-export interface IMessage {
+/**
+ * 
+ * Fields used by chat-components and currently added by the Webchat Client. 
+ * Expected to be present in the socket message sent by endpoint at some point.
+*/
+export interface IWebchatClientMessage {
+	avatarUrl?: string;
+	avatarName?: string;
+	timestamp?: string;
+}
+// We temporary extend IMessage with IWebchatClientMessage
+// to avoid making changes in the codebase. See prev. comment.
+export interface IMessage extends IWebchatClientMessage{
 	text?: string | null;
 	data?: IMessageData;
 	source?: "user" | "bot" | "engagement" | "agent";
-	timestamp?: string;
-	avatarUrl?: string;
-	avatarName?: string;
 	disableSensitiveLogging?: boolean;
 	traceId?: string;
 };
