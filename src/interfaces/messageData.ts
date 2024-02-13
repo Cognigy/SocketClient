@@ -44,6 +44,13 @@ export interface IPluginXApp {
     };
 }
 
+export interface IPluginXAppSubmit {
+    type: "x-app-submit";
+    data: {
+        success: boolean;
+    };
+}
+
 export interface IPluginDatepicker {
 	type: "date-picker";
 	data: {
