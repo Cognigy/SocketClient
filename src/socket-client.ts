@@ -395,4 +395,5 @@ export {
     IWebchatAudioAttachment,
     IWebchatImageAttachment,
     IWebchatVideoAttachment,
+    IUploadFileAttachmentData,
 } from "./interfaces/messageData";

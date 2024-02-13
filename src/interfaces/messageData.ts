@@ -23,6 +23,7 @@ export interface IMessage extends IWebchatClientMessage{
 export interface IMessageData {
 	_cognigy?: ICognigyData;
 	_plugin?: IPluginDatepicker | IPluginXApp | IPluginXAppSubmit;
+	attachments?: IUploadFileAttachmentData[];
 }
 
 export interface ICognigyData {
@@ -266,4 +267,13 @@ export interface ISetRatingControlCommand {
 		comment?: string;
 		showRatingStatus?: boolean;
 	};
+}
+
+export interface IUploadFileAttachmentData {
+	runtimeFileId: string;
+	fileName: string;
+	status?: "infected" | "scanned";
+	mimeType: string;
+	size: number;
+	url: string;
 }
