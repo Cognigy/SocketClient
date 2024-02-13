@@ -22,7 +22,7 @@ export interface IMessage extends IWebchatClientMessage{
 
 export interface IMessageData {
 	_cognigy?: ICognigyData;
-	_plugin?: IPluginDatepicker; // TODO: add all plugins we have
+	_plugin?: IPluginDatepicker | IPluginXApp | IPluginXAppSubmit;
 	attachments?: IUploadFileAttachmentData[];
 }
 
@@ -33,6 +33,23 @@ export interface ICognigyData {
 	_facebook?: IWebchatMessage;
 	syncWebchatWithFacebook?: boolean;
 	controlCommands?: ISetRatingControlCommand[];
+}
+
+export interface IPluginXApp {
+    type: "x-app";
+    data: {
+        sessionUrl: string;
+        openButtonLabel?: string;
+        immediateOpen?: boolean;
+		headerTitle?: string;
+    };
+}
+
+export interface IPluginXAppSubmit {
+    type: "x-app-submit";
+    data: {
+        success: boolean;
+    };
 }
 
 export interface IPluginDatepicker {
