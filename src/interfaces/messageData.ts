@@ -28,11 +28,17 @@ export interface IMessageData {
 
 export interface ICognigyData {
 	_default?: IDefaultMessage;
+	_defaultPreview?: any;
 	_webchat?: IWebchatMessage | IAdaptiveCardMessage;
 	_plugin?: unknown;
 	_facebook?: IWebchatMessage;
 	syncWebchatWithFacebook?: boolean;
 	controlCommands?: ISetRatingControlCommand[];
+}
+
+export interface IPluginAdaptiveCards {
+    type: "adaptivecards";
+    data?: any;
 }
 
 export interface IPluginXApp {
