@@ -22,7 +22,7 @@ export interface IMessage extends IWebchatClientMessage{
 
 export interface IMessageData {
 	_cognigy?: ICognigyData;
-	_plugin?: IPluginDatepicker | IPluginXApp | IPluginXAppSubmit;
+	_plugin?: IPluginDatepicker | IPluginXApp | IPluginXAppSubmit | IPluginAdaptiveCards;
 	attachments?: IUploadFileAttachmentData[];
 }
 
