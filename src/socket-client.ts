@@ -239,10 +239,24 @@ export class SocketClient extends EventEmitter {
          * On v3 environments, we're publishing the "finalPing" as an "output" event with "type: finalPing",
          * on v4 environments, we're directly publishing the "finalPing" as a "finalPing" event!
          */
-        socket.on("finalPing", (reply: any) => this.emit('finalPing', reply));
+        socket.on("finalPing", (reply: any, ackCallback?: Function) => {
+
+            // "ack-ing" callback to invoke (callback is the last parameter), gets called if defined.
+            if (ackCallback && typeof ackCallback === 'function') {
+                ackCallback({ acked: true });
+            }
+
+            this.emit('finalPing', reply);
+        });
 
         // decide positive / negative outcome of output based on content
-        socket.on("output", (reply: IProcessReplyPayload) => {
+        socket.on("output", (reply: IProcessReplyPayload, ackCallback?: Function) => {
+
+            // "ack-ing" callback to invoke (callback is the last parameter), gets called if defined.
+            if (ackCallback && typeof ackCallback === 'function') {
+                ackCallback({ acked: true });
+            }
+
             if (reply && reply.type === "error") {
                 return this.emit('error', reply.data.error);
             }
