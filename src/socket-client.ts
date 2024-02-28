@@ -243,7 +243,7 @@ export class SocketClient extends EventEmitter {
 
             // "ack-ing" callback to invoke (callback is the last parameter), gets called if defined.
             if (ackCallback && typeof ackCallback === 'function') {
-                ackCallback({ acked: true });
+                ackCallback({ acked: true }); // default response is always acked: true if received by client, otherwise it will be auto rejected within specified time (currently 2 sec) at socket server.
             }
 
             this.emit('finalPing', reply);
@@ -254,7 +254,7 @@ export class SocketClient extends EventEmitter {
 
             // "ack-ing" callback to invoke (callback is the last parameter), gets called if defined.
             if (ackCallback && typeof ackCallback === 'function') {
-                ackCallback({ acked: true });
+                ackCallback({ acked: true }); // default response is always acked: true if received by client, otherwise it will be auto rejected within specified time (currently 2 sec) at socket server.
             }
 
             if (reply && reply.type === "error") {
