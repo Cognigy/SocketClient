@@ -28,7 +28,7 @@ export class SocketClient extends EventEmitter {
             userId: `user-${uuid()}`,
             sessionId: `session-${uuid()}`,
             testMode: false,
-
+            emitWithAck: true,
             // connection behaviour
             expiresIn: null,
             forceWebsockets: false,
@@ -86,7 +86,7 @@ export class SocketClient extends EventEmitter {
 
         if (this.shouldStopReconnecting()) {
             console.log(`[SocketClient] Reconnection attempts limit reached. Giving up.`);
-            this.emit("socket/error", { type: "RECONNECTION_LIMIT"});
+            this.emit("socket/error", { type: "RECONNECTION_LIMIT" });
         }
 
     }
@@ -191,6 +191,7 @@ export class SocketClient extends EventEmitter {
                 urlToken: encodeURIComponent(this.socketURLToken),
                 userId: encodeURIComponent(this.socketOptions.userId),
                 testMode: encodeURIComponent(this.socketOptions.testMode ? "true" : "false"),
+                emitWithAck: encodeURIComponent(this.socketOptions.emitWithAck ? "true" : "false"),
             }
         } else {
             /**
@@ -295,7 +296,8 @@ export class SocketClient extends EventEmitter {
                     const {
                         userId,
                         sessionId,
-                        testMode
+                        testMode,
+                        emitWithAck
                     } = this.socketOptions;
 
                     const urlToken = this.socketURLToken;
@@ -304,7 +306,8 @@ export class SocketClient extends EventEmitter {
                         userId,
                         sessionId,
                         urlToken,
-                        testMode
+                        testMode,
+                        emitWithAck
                     }
 
                     console.log("[SocketClient] completing session handshake");

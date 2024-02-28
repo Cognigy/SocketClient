@@ -40,4 +40,13 @@ export interface Options {
 	 * test messages without increasing the billable conversation count.
 	 */
 	testMode: boolean;
+
+	/**
+	 * If this is enabled, this`emitWithAck` parameter with be passed to socket connection.
+	 * And socket.io endpoint will emit messages with acknowledgement. This will be useful when event buffering feature is enabled
+	 * and network goes of, in lack of "acknowledgement" back to socket endpoint, message delivery is considered to be failed.
+	 * 
+	 * This is enabled by default and only used when "event buffering feature is enabled".
+	 */
+	emitWithAck: boolean;
 };
