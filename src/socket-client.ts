@@ -28,7 +28,7 @@ export class SocketClient extends EventEmitter {
             userId: `user-${uuid()}`,
             sessionId: `session-${uuid()}`,
             testMode: false,
-
+            emitWithAck: true,
             // connection behaviour
             expiresIn: null,
             forceWebsockets: false,
@@ -86,7 +86,7 @@ export class SocketClient extends EventEmitter {
 
         if (this.shouldStopReconnecting()) {
             console.log(`[SocketClient] Reconnection attempts limit reached. Giving up.`);
-            this.emit("socket/error", { type: "RECONNECTION_LIMIT"});
+            this.emit("socket/error", { type: "RECONNECTION_LIMIT" });
         }
 
     }
@@ -191,6 +191,7 @@ export class SocketClient extends EventEmitter {
                 urlToken: encodeURIComponent(this.socketURLToken),
                 userId: encodeURIComponent(this.socketOptions.userId),
                 testMode: encodeURIComponent(this.socketOptions.testMode ? "true" : "false"),
+                emitWithAck: encodeURIComponent(this.socketOptions.emitWithAck ? "true" : "false"),
             }
         } else {
             /**
@@ -239,10 +240,24 @@ export class SocketClient extends EventEmitter {
          * On v3 environments, we're publishing the "finalPing" as an "output" event with "type: finalPing",
          * on v4 environments, we're directly publishing the "finalPing" as a "finalPing" event!
          */
-        socket.on("finalPing", (reply: any) => this.emit('finalPing', reply));
+        socket.on("finalPing", (reply: any, ackCallback?: Function) => {
+
+            // "ack-ing" callback to invoke (callback is the last parameter), gets called if defined.
+            if (ackCallback && typeof ackCallback === 'function') {
+                ackCallback(); // default response is empty if received by client, otherwise it will be auto rejected within specified time (currently 2 sec) at socket server.
+            }
+
+            this.emit('finalPing', reply);
+        });
 
         // decide positive / negative outcome of output based on content
-        socket.on("output", (reply: IProcessReplyPayload) => {
+        socket.on("output", (reply: IProcessReplyPayload, ackCallback?: Function) => {
+
+            // "ack-ing" callback to invoke (callback is the last parameter), gets called if defined.
+            if (ackCallback && typeof ackCallback === 'function') {
+                ackCallback(); // default response is empty if received by client, otherwise it will be auto rejected within specified time (currently 2 sec) at socket server.
+            }
+
             if (reply && reply.type === "error") {
                 return this.emit('error', reply.data.error);
             }
@@ -281,7 +296,8 @@ export class SocketClient extends EventEmitter {
                     const {
                         userId,
                         sessionId,
-                        testMode
+                        testMode,
+                        emitWithAck
                     } = this.socketOptions;
 
                     const urlToken = this.socketURLToken;
@@ -290,7 +306,8 @@ export class SocketClient extends EventEmitter {
                         userId,
                         sessionId,
                         urlToken,
-                        testMode
+                        testMode,
+                        emitWithAck
                     }
 
                     console.log("[SocketClient] completing session handshake");
