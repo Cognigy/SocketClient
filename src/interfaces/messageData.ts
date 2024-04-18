@@ -72,7 +72,7 @@ export interface IPluginDatepicker {
   };
 }
 
-export type TButtonType = "postback" | "web_url" | "phone_number";
+export type TButtonType = "postback" | "web_url" | "phone_number" | "openXApp";
 
 /**
  * Default Message Interfaces
