@@ -100,7 +100,7 @@ export class SocketClient extends EventEmitter {
 
     private flushMessageBuffer() {
         if (this.messageBuffer.length > 0) {
-            if (this.connected) {
+            if (this.connected && this.isEndpointReady) {
                 console.log(`[SocketClient] Starting to send your buffered messages...`);
                 for (let msg of this.messageBuffer) {
                     this.sendMessage(msg.text, msg.data);
@@ -109,7 +109,7 @@ export class SocketClient extends EventEmitter {
                 console.log(`[SocketClient] Finished sending ${this.messageBuffer.length} buffered messages.`);
                 this.messageBuffer = [];
             } else {
-                console.log('[SocketClient] Could not send your buffered messages because we are not connected')
+                console.log('[SocketClient] Could not send your buffered messages because we are not connected or the Endpoint is not yet ready')
             }
         }
     }
@@ -136,7 +136,21 @@ export class SocketClient extends EventEmitter {
     }
 
 
+    private _isEndpointReady = false;
 
+    /**
+     * tells whether the endpoint is ready
+     * to accept messages from the client
+     */
+    get isEndpointReady(): boolean {
+        return this._isEndpointReady;
+    }
+
+
+    /**
+     * tells whether the socket connection
+     * to the endpoint is established
+     */
     get connected(): boolean {
         if (!this.socket)
             return false;
@@ -319,28 +333,22 @@ export class SocketClient extends EventEmitter {
             socket.on("connect", () => {
                 this.socket = socket;
 
-                this.flushMessageBuffer();
-
                 // if configured, initialize automatic reconnect attempts
                 if (this.socketOptions.reconnection)
                     this.setupReconnectInterval();
+            });
 
-                /**
-                 * If "inner socket handshake" is enabled, the connection
-                 * isn't "fully established" until the backend learnt
-                 * about the session parameters!
-                 */
-                if (this.socketOptions.enableInnerSocketHandshake) {
-                    return;
-                }
+            socket.once("endpoint-ready", () => {
+                this._isEndpointReady = true;
+
+                this.flushMessageBuffer();
 
                 resolve();
-            });
+            })
 
             socket.connect();
         });
 
-        console.log("[SocketClient] connection established");
         return this;
     }
 
@@ -357,7 +365,7 @@ export class SocketClient extends EventEmitter {
     }
 
     public sendMessage(text: string, data?: any): SocketClient {
-        if (this.connected) {
+        if (this.connected && this.isEndpointReady) {
             this.resetReconnectionCounter();
             this.updateLastUsed();
 
@@ -383,7 +391,7 @@ export class SocketClient extends EventEmitter {
                 data: data
             });
 
-            console.log(`[SocketClient] Unable to directly send your message since we are not connected. Your message will be buffered and sent later on.`);
+            console.log(`[SocketClient] Unable to directly send your message since we are not connected or the Endpoint is not yet ready to accept messages. Your message will be buffered and sent later on.`);
         }
 
         return this;
