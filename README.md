@@ -40,6 +40,14 @@ const { SocketClient } = require("@cognigy/socket-client");
 
 > In case you are using TypeScript in a frontend codebase, you may need to manually install `@types/node` to avoid transpilation errors regarding event-related code parts like e.g. `client.on()`
 
+
+## Compatibility
+
+| SocketClient | Cognigy.AI | Note |
+| - | - | - |
+| >= `v4.8.1` | >= `v4.79.0` | Starting with SocketClient version `v4.8.1`, the client waits for an `"endpoint-ready"` event during `connect()` which is only emitted by Endpoints from Cognigy.AI version `v4.79.0` or later!
+| <= `v4.8.0` | `*` |
+
 ## Socket Events
 
 You can subscribe to the following events from the `SocketClient`:
