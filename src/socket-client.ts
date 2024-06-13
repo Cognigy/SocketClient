@@ -331,6 +331,10 @@ export class SocketClient extends EventEmitter {
             }
 
             socket.on("connect", () => {
+                // reset "endpoint ready" state
+                // in case we reconnected
+                this._isEndpointReady = false;
+
                 this.socket = socket;
 
                 // if configured, initialize automatic reconnect attempts
