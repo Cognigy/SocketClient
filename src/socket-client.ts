@@ -396,4 +396,6 @@ export {
     IWebchatImageAttachment,
     IWebchatVideoAttachment,
     IUploadFileAttachmentData,
+    IQueueUpdateEvent,
+    ILiveAgentEvent,
 } from "./interfaces/messageData";
