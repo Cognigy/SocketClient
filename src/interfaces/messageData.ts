@@ -95,20 +95,20 @@ export type TButtonType = "postback" | "web_url" | "phone_number";
 export type TWebchat3Event = IQueueUpdateEvent | ILiveAgentEvent;
 export interface IQueueUpdateEvent {
 	type: "queueUpdate";
-  payload: {
-    position: number | null;
-    estimatedWaitTime: number | null;
-    alternativeText: string | null;
-  }
+	payload: {
+		position: number | null;
+		estimatedWaitTime: number | null;
+		alternativeText: string | null;
+	};
 }
 
 export interface ILiveAgentEvent {
 	type: "liveAgentEvent";
-  payload: {
-    text?: string;
-    action?: string;
-    agentName?: string;
-  }
+	payload: {
+		text?: string;
+		action?: string;
+		agentName?: string;
+	};
 }
 
 /**
