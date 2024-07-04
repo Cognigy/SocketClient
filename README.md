@@ -79,3 +79,20 @@ const client = new SocketClient("https://socket.url", "socket-token", {
 | `reconnection`               | boolean | `true`                                 | if enabled, will try to reconnect if the connection is aborted                                                                             |
 | `reconnectionLimit`          | number  | `5`                                    | limit the maximum number of reconnection attempts, `0` means no limit                                                                      |
 | `enableInnerSocketHandshake` | boolean | `false`                                | If this is enabled, the session parameters (userId, sessionId, urlToken) will be transferred through the websocket instead of query params |
+
+## Release v5 beta
+
+Publish beta version using the following `npm` command (it requires rights on npm group)
+
+Pre-publish steps
+```
+npm version 5.0.0-beta.<new_version>
+git push
+npm run build
+```
+
+Publish to npm registry
+
+```
+npm publish --tag beta
+```
