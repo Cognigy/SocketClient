@@ -204,6 +204,7 @@ export interface IDefaultVideo {
 	type: "video";
 	videoUrl: string;
 	videoAltText: string;
+	videoCaptionsUrl?: string;
 }
 
 export interface IAdaptiveCardMessage {
@@ -264,6 +265,7 @@ export interface IWebchatVideoAttachment {
 	payload: {
 		url: string;
 		altText: string;
+		captionsUrl?: string;
 	};
 }
 
