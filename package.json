@@ -8,7 +8,7 @@
   "types": "lib/socket-client",
   "scripts": {
     "build": "tsc",
-    "prePublish": "npm run build"
+    "prepublishOnly": "npm run build"
   },
   "dependencies": {
     "detect-browser": "^4.8.0",
