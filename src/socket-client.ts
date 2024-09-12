@@ -28,7 +28,7 @@ export class SocketClient extends EventEmitter {
             userId: `user-${uuid()}`,
             sessionId: `session-${uuid()}`,
             testMode: false,
-
+            emitWithAck: true,
             // connection behaviour
             expiresIn: null,
             forceWebsockets: false,
@@ -86,7 +86,7 @@ export class SocketClient extends EventEmitter {
 
         if (this.shouldStopReconnecting()) {
             console.log(`[SocketClient] Reconnection attempts limit reached. Giving up.`);
-            this.emit("socket/error", { type: "RECONNECTION_LIMIT"});
+            this.emit("socket/error", { type: "RECONNECTION_LIMIT" });
         }
 
     }
@@ -100,7 +100,7 @@ export class SocketClient extends EventEmitter {
 
     private flushMessageBuffer() {
         if (this.messageBuffer.length > 0) {
-            if (this.connected) {
+            if (this.connected && this.isEndpointReady) {
                 console.log(`[SocketClient] Starting to send your buffered messages...`);
                 for (let msg of this.messageBuffer) {
                     this.sendMessage(msg.text, msg.data);
@@ -109,7 +109,7 @@ export class SocketClient extends EventEmitter {
                 console.log(`[SocketClient] Finished sending ${this.messageBuffer.length} buffered messages.`);
                 this.messageBuffer = [];
             } else {
-                console.log('[SocketClient] Could not send your buffered messages because we are not connected')
+                console.log('[SocketClient] Could not send your buffered messages because we are not connected or the Endpoint is not yet ready')
             }
         }
     }
@@ -136,7 +136,21 @@ export class SocketClient extends EventEmitter {
     }
 
 
+    private _isEndpointReady = false;
 
+    /**
+     * tells whether the endpoint is ready
+     * to accept messages from the client
+     */
+    get isEndpointReady(): boolean {
+        return this._isEndpointReady;
+    }
+
+
+    /**
+     * tells whether the socket connection
+     * to the endpoint is established
+     */
     get connected(): boolean {
         if (!this.socket)
             return false;
@@ -191,6 +205,7 @@ export class SocketClient extends EventEmitter {
                 urlToken: encodeURIComponent(this.socketURLToken),
                 userId: encodeURIComponent(this.socketOptions.userId),
                 testMode: encodeURIComponent(this.socketOptions.testMode ? "true" : "false"),
+                emitWithAck: encodeURIComponent(this.socketOptions.emitWithAck ? "true" : "false"),
             }
         } else {
             /**
@@ -239,10 +254,24 @@ export class SocketClient extends EventEmitter {
          * On v3 environments, we're publishing the "finalPing" as an "output" event with "type: finalPing",
          * on v4 environments, we're directly publishing the "finalPing" as a "finalPing" event!
          */
-        socket.on("finalPing", (reply: any) => this.emit('finalPing', reply));
+        socket.on("finalPing", (reply: any, ackCallback?: Function) => {
+
+            // "ack-ing" callback to invoke (callback is the last parameter), gets called if defined.
+            if (ackCallback && typeof ackCallback === 'function') {
+                ackCallback(); // default response is empty if received by client, otherwise it will be auto rejected within specified time (currently 2 sec) at socket server.
+            }
+
+            this.emit('finalPing', reply);
+        });
 
         // decide positive / negative outcome of output based on content
-        socket.on("output", (reply: IProcessReplyPayload) => {
+        socket.on("output", (reply: IProcessReplyPayload, ackCallback?: Function) => {
+
+            // "ack-ing" callback to invoke (callback is the last parameter), gets called if defined.
+            if (ackCallback && typeof ackCallback === 'function') {
+                ackCallback(); // default response is empty if received by client, otherwise it will be auto rejected within specified time (currently 2 sec) at socket server.
+            }
+
             if (reply && reply.type === "error") {
                 return this.emit('error', reply.data.error);
             }
@@ -281,7 +310,8 @@ export class SocketClient extends EventEmitter {
                     const {
                         userId,
                         sessionId,
-                        testMode
+                        testMode,
+                        emitWithAck
                     } = this.socketOptions;
 
                     const urlToken = this.socketURLToken;
@@ -290,7 +320,8 @@ export class SocketClient extends EventEmitter {
                         userId,
                         sessionId,
                         urlToken,
-                        testMode
+                        testMode,
+                        emitWithAck
                     }
 
                     console.log("[SocketClient] completing session handshake");
@@ -300,30 +331,28 @@ export class SocketClient extends EventEmitter {
             }
 
             socket.on("connect", () => {
-                this.socket = socket;
+                // reset "endpoint ready" state
+                // in case we reconnected
+                this._isEndpointReady = false;
 
-                this.flushMessageBuffer();
+                this.socket = socket;
 
                 // if configured, initialize automatic reconnect attempts
                 if (this.socketOptions.reconnection)
                     this.setupReconnectInterval();
+            });
 
-                /**
-                 * If "inner socket handshake" is enabled, the connection
-                 * isn't "fully established" until the backend learnt
-                 * about the session parameters!
-                 */
-                if (this.socketOptions.enableInnerSocketHandshake) {
-                    return;
-                }
+            socket.once("endpoint-ready", () => {
+                this._isEndpointReady = true;
+
+                this.flushMessageBuffer();
 
                 resolve();
-            });
+            })
 
             socket.connect();
         });
 
-        console.log("[SocketClient] connection established");
         return this;
     }
 
@@ -351,7 +380,7 @@ export class SocketClient extends EventEmitter {
     }
 
     public sendMessage(text: string, data?: any): SocketClient {
-        if (this.connected) {
+        if (this.connected && this.isEndpointReady) {
             this.resetReconnectionCounter();
             this.updateLastUsed();
 
@@ -377,7 +406,7 @@ export class SocketClient extends EventEmitter {
                 data: data
             });
 
-            console.log(`[SocketClient] Unable to directly send your message since we are not connected. Your message will be buffered and sent later on.`);
+            console.log(`[SocketClient] Unable to directly send your message since we are not connected or the Endpoint is not yet ready to accept messages. Your message will be buffered and sent later on.`);
         }
 
         return this;
