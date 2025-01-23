@@ -16,3 +16,4 @@ Thumbs.db
 *.d.ts
 
 .vscode/
+*.tgz

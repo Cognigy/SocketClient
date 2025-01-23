@@ -21,5 +21,8 @@
     "@types/uuid": "9.0.6",
     "adaptivecards": "3.0.1",
     "typescript": "5.2.2"
+  },
+  "engines": {
+    "node": ">=22.1.0"
   }
 }
