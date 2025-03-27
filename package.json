@@ -23,8 +23,5 @@
   },
   "engines": {
     "node": ">=22.1.0"
-  },
-  "overrides": {
-    "parseuri": ">=3.0.1"
   }
 }
