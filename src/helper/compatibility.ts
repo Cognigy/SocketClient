@@ -3,6 +3,9 @@ import { detect } from "detect-browser";
 const browser = detect();
 
 export const shouldForceWebsockets = () => {
+  // ios in-app browser case
+  if (!browser) return true;
+  
     switch (browser.name) {
         // Internet Explorer
         case 'ie':
