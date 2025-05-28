@@ -5,7 +5,7 @@ import { Options } from "./interfaces/options";
 import { IOutput } from "./interfaces/output";
 import { IProcessReplyPayload } from "./interfaces/output";
 import { Input } from "./interfaces/input";
-import { ITypingStatusPayload } from "./interfaces/typingStatus";
+import { ITypingStatusPayload, TTypingStatus } from "./interfaces/typingStatus";
 import { shouldForceWebsockets } from "./helper/compatibility";
 
 export class SocketClient extends EventEmitter {
@@ -410,6 +410,14 @@ export class SocketClient extends EventEmitter {
         }
 
         return this;
+    }
+    
+    public sendTypingStatus(status: TTypingStatus): SocketClient {
+      if (this.connected && this.isEndpointReady) {
+        this.socket.emit("typingStatus", { status });
+      }
+      
+    return this;
     }
 }
 
