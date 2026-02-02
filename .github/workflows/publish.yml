@@ -1,7 +1,7 @@
 # =============================================================================
 # @cognigy/socket-client - Publish to npm
 # =============================================================================
-# Triggered on push to main branch.
+# Triggered when a version tag (v*) is pushed.
 # Builds the package and publishes to npm using trusted publishing (OIDC).
 # =============================================================================
 
@@ -9,8 +9,8 @@ name: Publish to npm
 
 on:
   push:
-    branches:
-      - main
+    tags:
+      - 'v*'
   workflow_dispatch:
 
 permissions:
