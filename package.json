@@ -4,6 +4,7 @@
   "description": "A client used to connect to Cognigy installations through Socket-Endpoints",
   "author": "Robin Schuster <r.schuster@cognigy.com>",
   "license": "SEE LICENSE IN LICENSE",
+  "url": "https://github.com/Cognigy/SocketClient",
   "main": "lib/socket-client.js",
   "types": "lib/socket-client",
   "scripts": {
