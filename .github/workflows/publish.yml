@@ -1,0 +1,57 @@
+# =============================================================================
+# @cognigy/socket-client - Publish to npm
+# =============================================================================
+# Triggered when a version tag (v*) is pushed.
+# Builds the package and publishes to npm using trusted publishing (OIDC).
+# =============================================================================
+
+name: Publish to npm
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions:
+  id-token: write # Required for npm trusted publishing (OIDC)
+  contents: read
+
+jobs:
+  publish:
+    name: Build and Publish
+    runs-on: ubuntu-latest
+
+    steps:
+      # ----------------------------------------------------------------------
+      # Checkout the repository
+      # ----------------------------------------------------------------------
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # ----------------------------------------------------------------------
+      # Setup Node.js with npm registry (Node 24 includes npm 11.5.1+)
+      # ----------------------------------------------------------------------
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          registry-url: 'https://registry.npmjs.org'
+
+      # ----------------------------------------------------------------------
+      # Install dependencies
+      # ----------------------------------------------------------------------
+      - name: Install dependencies
+        run: npm ci
+
+      # ----------------------------------------------------------------------
+      # Build the package
+      # ----------------------------------------------------------------------
+      - name: Build
+        run: npm run build
+
+      # ----------------------------------------------------------------------
+      # Publish to npm using OIDC (no token needed)
+      # ----------------------------------------------------------------------
+      - name: Publish to npm
+        run: npm publish --access public
