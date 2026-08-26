@@ -12,3 +12,6 @@ Thumbs.db
 # do not publish ts files to npm
 *.ts
 !*.d.ts
+
+# do not publish test tooling config
+jest.config.js

@@ -57,6 +57,11 @@ class FakeSocket extends EventEmitter {
 		const ack = this.pendingAcks.shift();
 		ack?.(err);
 	}
+
+	resolvePendingAck() {
+		const ack = this.pendingAcks.shift();
+		ack?.(null);
+	}
 }
 
 function createConnectedClient(fakeSocket: FakeSocket) {
@@ -89,7 +94,7 @@ describe("SocketClient", () => {
 });
 
 describe("SocketClient#sendMessage", () => {
-	it("re-buffers a message and resends it after reconnecting, if the connection drops before it is acknowledged", () => {
+	it("does not re-buffer a message on disconnect-before-ack if no ack has ever been confirmed on this connection", () => {
 		const fakeSocket = new FakeSocket();
 		const client = createConnectedClient(fakeSocket);
 
@@ -98,13 +103,39 @@ describe("SocketClient#sendMessage", () => {
 
 		// Connection drops mid-flight, before the endpoint could
 		// acknowledge receipt of "hello" - e.g. a backend rolling restart.
+		// We have no positive evidence yet that this endpoint acks
+		// "processInput" at all (no ack has ever succeeded on this
+		// connection), so this is indistinguishable from an endpoint that
+		// already received and processed "hello" but simply never acks -
+		// re-buffering here would risk sending a duplicate. This matches
+		// the pre-existing status quo for this scenario: no regression.
 		fakeSocket.disconnect();
 
 		const secondFakeSocket = reconnect(client);
 
-		// The message must be re-sent after reconnecting, not silently
-		// dropped just because it looked "sent" before the drop.
-		expect(secondFakeSocket.sentProcessInputs.map(m => m.text)).toContain("hello");
+		expect(secondFakeSocket.sentProcessInputs).toHaveLength(0);
+	});
+
+	it("re-buffers and resends a message on disconnect-before-ack once an earlier message on this connection has been confirmed acked", () => {
+		const fakeSocket = new FakeSocket();
+		const client = createConnectedClient(fakeSocket);
+
+		// First message: let its ack succeed normally. This is positive
+		// evidence that this endpoint does ack "processInput" messages.
+		client.sendMessage("first");
+		fakeSocket.resolvePendingAck();
+
+		// Second message: connection drops before its ack arrives.
+		client.sendMessage("second");
+		fakeSocket.disconnect();
+
+		const secondFakeSocket = reconnect(client);
+
+		// Now that we know this endpoint acks messages, a disconnect
+		// before the ack arrives can be safely re-buffered and resent -
+		// if the endpoint had actually received "second", it would have
+		// acked it just like it acked "first".
+		expect(secondFakeSocket.sentProcessInputs.map(m => m.text)).toContain("second");
 	});
 
 	it("does not re-send a message if only the ack times out while the connection stays alive", () => {
