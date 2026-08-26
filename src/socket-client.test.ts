@@ -106,4 +106,40 @@ describe("SocketClient#sendMessage", () => {
 		// dropped just because it looked "sent" before the drop.
 		expect(secondFakeSocket.sentProcessInputs.map(m => m.text)).toContain("hello");
 	});
+
+	it("does not re-send a message if only the ack times out while the connection stays alive", () => {
+		const fakeSocket = new FakeSocket();
+		const client = createConnectedClient(fakeSocket);
+
+		client.sendMessage("hello");
+		expect(fakeSocket.sentProcessInputs.map(m => m.text)).toEqual(["hello"]);
+
+		// The ack never arrives, but we never disconnected either - this
+		// simulates an endpoint that doesn't ack "processInput" at all.
+		fakeSocket.timeoutPendingAck(new Error("operation has timed out"));
+
+		const secondFakeSocket = reconnect(client);
+
+		// Nothing should be re-sent - the endpoint may already have
+		// received and processed "hello"; re-sending would duplicate it.
+		expect(secondFakeSocket.sentProcessInputs).toHaveLength(0);
+	});
+
+	it("falls back to a plain fire-and-forget emit when emitWithAck is disabled", () => {
+		const fakeSocket = new FakeSocket();
+		(io as jest.Mock).mockReturnValue(fakeSocket);
+		const client = new SocketClient("https://example.cognigy.ai", "token", {
+			reconnection: false,
+			emitWithAck: false,
+		});
+		client.connect();
+		fakeSocket.connect();
+		fakeSocket.emit("endpoint-ready");
+
+		const timeoutSpy = jest.spyOn(fakeSocket, "timeout");
+		client.sendMessage("hello");
+
+		expect(timeoutSpy).not.toHaveBeenCalled();
+		expect(fakeSocket.sentProcessInputs.map(m => m.text)).toEqual(["hello"]);
+	});
 });
