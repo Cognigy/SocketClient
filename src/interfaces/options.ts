@@ -42,11 +42,14 @@ export interface Options {
 	testMode: boolean;
 
 	/**
-	 * If this is enabled, this`emitWithAck` parameter with be passed to socket connection.
-	 * And socket.io endpoint will emit messages with acknowledgement. This will be useful when event buffering feature is enabled
-	 * and network goes of, in lack of "acknowledgement" back to socket endpoint, message delivery is considered to be failed.
-	 * 
-	 * This is enabled by default and only used when "event buffering feature is enabled".
+	 * If this is enabled, `sendMessage` waits for the endpoint to
+	 * acknowledge each message before considering it delivered. If the
+	 * connection drops before the acknowledgement arrives, the message
+	 * is re-buffered and resent on the next successful reconnect,
+	 * instead of being silently lost while the UI already shows it as
+	 * sent.
+	 *
+	 * Enabled by default.
 	 */
 	emitWithAck: boolean;
 };

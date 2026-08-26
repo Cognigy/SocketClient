@@ -379,13 +379,14 @@ export class SocketClient extends EventEmitter {
         return this;
     }
 
+    private static readonly PROCESS_INPUT_ACK_TIMEOUT_MS = 10000;
+
     public sendMessage(text: string, data?: any): SocketClient {
         if (this.connected && this.isEndpointReady) {
             this.resetReconnectionCounter();
             this.updateLastUsed();
 
-            /* Send the processInput event to the endpoint */
-            this.socket.emit("processInput", {
+            const payload = {
                 URLToken: this.socketURLToken,
                 userId: this.socketOptions.userId,
                 sessionId: this.socketOptions.sessionId,
@@ -395,7 +396,34 @@ export class SocketClient extends EventEmitter {
                 resetFlow: !!this.socketOptions.resetFlow,
                 text,
                 data,
-            });
+            };
+
+            if (this.socketOptions.emitWithAck) {
+                /**
+                 * Wait for the endpoint to acknowledge the message. If the
+                 * connection drops before that happens (e.g. a backend
+                 * restart mid-flight), re-buffer the message so it gets
+                 * resent on the next successful reconnect, instead of
+                 * silently losing it while the UI already shows it as sent.
+                 *
+                 * If the ack simply never arrives while we're still
+                 * connected, the endpoint doesn't support acking this
+                 * event - don't re-buffer, since we can't tell that apart
+                 * from a message the endpoint already received and
+                 * processed, and re-sending would duplicate it.
+                 */
+                this.socket
+                    .timeout(SocketClient.PROCESS_INPUT_ACK_TIMEOUT_MS)
+                    .emit("processInput", payload, (err: Error | null) => {
+                        if (err && !this.connected) {
+                            console.log(`[SocketClient] Message was not acknowledged before the connection dropped, re-buffering it: ${err.message}`);
+                            this.messageBuffer.push({ text, data });
+                        }
+                    });
+            } else {
+                /* Send the processInput event to the endpoint */
+                this.socket.emit("processInput", payload);
+            }
 
         } else {
             // we currently have no connection - could be the case that we lost connection
