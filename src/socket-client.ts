@@ -21,12 +21,13 @@ export class SocketClient extends EventEmitter {
     private lastUsed: number;
 
     /**
-     * Tracks whether this endpoint/deployment has ever successfully
-     * acknowledged a "processInput" message. This is evidence about what
-     * the endpoint supports, not per-connection state, so it is
-     * deliberately NOT reset by connect(), disconnect(), or
-     * switchSession() - only sendMessage()'s ack callback sets it, on the
-     * first successful ack.
+     * Tracks whether the CURRENT connection has had at least one
+     * "processInput" message successfully acked. Reset on every connect()
+     * call, because a reconnect can land on a different backend node -
+     * e.g. the "rolling restart" scenario this file's re-buffering exists
+     * for - whose ack support is unproven until we see it ack something
+     * ourselves. Only sendMessage()'s ack callback sets it, on the first
+     * successful ack on this connection.
      */
     private hasConfirmedAck = false;
 
@@ -178,6 +179,11 @@ export class SocketClient extends EventEmitter {
 
 
     public async connect(isReconnect = false): Promise<any> {
+        // A fresh connection may land on a different backend node than the
+        // last one, so any ack evidence gathered on a prior connection no
+        // longer applies - see hasConfirmedAck's doc comment.
+        this.hasConfirmedAck = false;
+
         const parsedUrl = new URL(this.socketUrl);
         const path = parsedUrl.pathname && parsedUrl.pathname !== "/" ?
             parsedUrl.pathname + "/socket.io" : null;
@@ -374,7 +380,19 @@ export class SocketClient extends EventEmitter {
         // in-flight message via the ack-callback error path above). Drop
         // it here so flushMessageBuffer() doesn't replay it into the new
         // session once it connects.
+        //
+        // These messages were never delivered, and a consumer such as the
+        // Webchat has already rendered them as sent, so tell it they are
+        // gone instead of dropping them silently.
+        const undelivered = this.messageBuffer;
         this.messageBuffer = [];
+
+        if (undelivered.length > 0) {
+            this.emit("messagesDiscarded", {
+                reason: "session-switched",
+                messages: undelivered,
+            });
+        }
 
         this.socketOptions['sessionId'] = sessionId || `session-${uuid()}`;
         this.reconnectCounter = 0;

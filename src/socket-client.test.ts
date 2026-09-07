@@ -173,4 +173,114 @@ describe("SocketClient#sendMessage", () => {
 		expect(timeoutSpy).not.toHaveBeenCalled();
 		expect(fakeSocket.sentProcessInputs.map(m => m.text)).toEqual(["hello"]);
 	});
+
+	it("resets hasConfirmedAck on reconnect, so an ack confirmed on a previous connection does not unlock re-buffering on a new one", () => {
+		const fakeSocket = new FakeSocket();
+		const client = createConnectedClient(fakeSocket);
+
+		// Confirm an ack on connection #1, then let it end cleanly (nothing
+		// in flight).
+		client.sendMessage("first");
+		fakeSocket.resolvePendingAck();
+		fakeSocket.disconnect();
+
+		const secondFakeSocket = reconnect(client);
+
+		// Connection #2 has not yet had any message acked - e.g. it landed
+		// on a different backend node after a rolling restart. A message
+		// sent now and lost to a disconnect must NOT be re-buffered, even
+		// though hasConfirmedAck was true on the previous connection: if it
+		// had carried over, this is exactly the duplicate the gate exists
+		// to prevent.
+		client.sendMessage("second");
+		secondFakeSocket.disconnect();
+
+		const thirdFakeSocket = reconnect(client);
+
+		expect(thirdFakeSocket.sentProcessInputs).toHaveLength(0);
+	});
+
+	it("re-buffers a message sent by flushMessageBuffer without losing it, even though the buffer is cleared right after the flush's send loop", () => {
+		const fakeSocket = new FakeSocket();
+		const client = createConnectedClient(fakeSocket);
+
+		// Buffer two messages while offline.
+		fakeSocket.disconnect();
+		client.sendMessage("A");
+		client.sendMessage("B");
+
+		// Reconnecting flushes both "A" and "B" via the ack-emit path in one
+		// synchronous pass, then immediately clears messageBuffer. Both
+		// acks are still pending when that clear runs.
+		const secondFakeSocket = reconnect(client);
+		expect(secondFakeSocket.sentProcessInputs.map(m => m.text)).toEqual(["A", "B"]);
+
+		// "A"'s ack succeeds - the first confirmed ack on this connection.
+		secondFakeSocket.resolvePendingAck();
+
+		// The connection drops before "B"'s ack arrives. That re-buffering
+		// push necessarily happens after flushMessageBuffer's synchronous
+		// send-then-clear already ran (ack callbacks are always
+		// asynchronous), so it lands in the current buffer rather than
+		// being wiped by a clear that already executed.
+		secondFakeSocket.disconnect();
+
+		const thirdFakeSocket = reconnect(client);
+		expect(thirdFakeSocket.sentProcessInputs.map(m => m.text)).toContain("B");
+	});
+});
+
+describe("SocketClient#switchSession", () => {
+	function beginSwitchSession(client: SocketClient, nextFakeSocket: FakeSocket) {
+		(io as jest.Mock).mockReturnValue(nextFakeSocket);
+		const switchPromise = client.switchSession("next-session");
+		nextFakeSocket.connect();
+		nextFakeSocket.emit("endpoint-ready");
+		return switchPromise;
+	}
+
+	it("does not leak a message buffered in the old session into the new session", async () => {
+		const fakeSocket = new FakeSocket();
+		const client = createConnectedClient(fakeSocket);
+
+		fakeSocket.disconnect();
+		client.sendMessage("leftover");
+
+		const nextFakeSocket = new FakeSocket();
+		await beginSwitchSession(client, nextFakeSocket);
+
+		expect(nextFakeSocket.sentProcessInputs).toHaveLength(0);
+	});
+
+	it("tells the consumer which messages were discarded, instead of dropping them silently", async () => {
+		const fakeSocket = new FakeSocket();
+		const client = createConnectedClient(fakeSocket);
+
+		fakeSocket.disconnect();
+		client.sendMessage("leftover");
+
+		const discarded = jest.fn();
+		client.on("messagesDiscarded", discarded);
+
+		const nextFakeSocket = new FakeSocket();
+		await beginSwitchSession(client, nextFakeSocket);
+
+		expect(discarded).toHaveBeenCalledWith({
+			reason: "session-switched",
+			messages: [{ text: "leftover", data: undefined }],
+		});
+	});
+
+	it("stays quiet when there is nothing undelivered to report", async () => {
+		const fakeSocket = new FakeSocket();
+		const client = createConnectedClient(fakeSocket);
+
+		const discarded = jest.fn();
+		client.on("messagesDiscarded", discarded);
+
+		const nextFakeSocket = new FakeSocket();
+		await beginSwitchSession(client, nextFakeSocket);
+
+		expect(discarded).not.toHaveBeenCalled();
+	});
 });
