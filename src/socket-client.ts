@@ -20,6 +20,17 @@ export class SocketClient extends EventEmitter {
     private messageBuffer: Input[] = [];
     private lastUsed: number;
 
+    /**
+     * Tracks whether the CURRENT connection has had at least one
+     * "processInput" message successfully acked. Reset on every connect()
+     * call, because a reconnect can land on a different backend node -
+     * e.g. the "rolling restart" scenario this file's re-buffering exists
+     * for - whose ack support is unproven until we see it ack something
+     * ourselves. Only sendMessage()'s ack callback sets it, on the first
+     * successful ack on this connection.
+     */
+    private hasConfirmedAck = false;
+
 
 
     private static createDefaultSocketOptions(): Options {
@@ -168,6 +179,11 @@ export class SocketClient extends EventEmitter {
 
 
     public async connect(isReconnect = false): Promise<any> {
+        // A fresh connection may land on a different backend node than the
+        // last one, so any ack evidence gathered on a prior connection no
+        // longer applies - see hasConfirmedAck's doc comment.
+        this.hasConfirmedAck = false;
+
         const parsedUrl = new URL(this.socketUrl);
         const path = parsedUrl.pathname && parsedUrl.pathname !== "/" ?
             parsedUrl.pathname + "/socket.io" : null;
@@ -358,6 +374,26 @@ export class SocketClient extends EventEmitter {
 
     public async switchSession(sessionId: string): Promise<SocketClient> {
         this.disconnect();
+
+        // Any message still buffered at this point belongs to the session
+        // we're leaving (disconnect() may have just re-buffered an
+        // in-flight message via the ack-callback error path above). Drop
+        // it here so flushMessageBuffer() doesn't replay it into the new
+        // session once it connects.
+        //
+        // These messages were never delivered, and a consumer such as the
+        // Webchat has already rendered them as sent, so tell it they are
+        // gone instead of dropping them silently.
+        const undelivered = this.messageBuffer;
+        this.messageBuffer = [];
+
+        if (undelivered.length > 0) {
+            this.emit("messagesDiscarded", {
+                reason: "session-switched",
+                messages: undelivered,
+            });
+        }
+
         this.socketOptions['sessionId'] = sessionId || `session-${uuid()}`;
         this.reconnectCounter = 0;
         this.updateLastUsed();
@@ -379,13 +415,14 @@ export class SocketClient extends EventEmitter {
         return this;
     }
 
+    private static readonly PROCESS_INPUT_ACK_TIMEOUT_MS = 10000;
+
     public sendMessage(text: string, data?: any): SocketClient {
         if (this.connected && this.isEndpointReady) {
             this.resetReconnectionCounter();
             this.updateLastUsed();
 
-            /* Send the processInput event to the endpoint */
-            this.socket.emit("processInput", {
+            const payload = {
                 URLToken: this.socketURLToken,
                 userId: this.socketOptions.userId,
                 sessionId: this.socketOptions.sessionId,
@@ -395,7 +432,49 @@ export class SocketClient extends EventEmitter {
                 resetFlow: !!this.socketOptions.resetFlow,
                 text,
                 data,
-            });
+            };
+
+            if (this.socketOptions.emitWithAck) {
+                /**
+                 * Wait for the endpoint to acknowledge the message. If the
+                 * connection drops before that happens (e.g. a backend
+                 * restart mid-flight), re-buffer the message so it gets
+                 * resent on the next successful reconnect, instead of
+                 * silently losing it while the UI already shows it as sent.
+                 *
+                 * If the ack simply never arrives while we're still
+                 * connected, the endpoint doesn't support acking this
+                 * event - don't re-buffer, since we can't tell that apart
+                 * from a message the endpoint already received and
+                 * processed, and re-sending would duplicate it.
+                 *
+                 * That same ambiguity applies on a disconnect-before-ack:
+                 * socket.io-client fires this callback with an error on ANY
+                 * disconnect, whether or not the endpoint was ever going to
+                 * ack this event at all. Against an endpoint that doesn't
+                 * ack "processInput", the message may already have been
+                 * received and processed before an unrelated disconnect -
+                 * re-buffering it then would duplicate it. We only have
+                 * positive evidence it's safe to re-buffer once we've seen
+                 * this endpoint successfully ack a message at least once on
+                 * this connection, hence the `hasConfirmedAck` gate below.
+                 */
+                this.socket
+                    .timeout(SocketClient.PROCESS_INPUT_ACK_TIMEOUT_MS)
+                    .emit("processInput", payload, (err: Error | null) => {
+                        if (err) {
+                            if (!this.connected && this.hasConfirmedAck) {
+                                console.log(`[SocketClient] Message was not acknowledged before the connection dropped, re-buffering it: ${err.message}`);
+                                this.messageBuffer.push({ text, data });
+                            }
+                        } else {
+                            this.hasConfirmedAck = true;
+                        }
+                    });
+            } else {
+                /* Send the processInput event to the endpoint */
+                this.socket.emit("processInput", payload);
+            }
 
         } else {
             // we currently have no connection - could be the case that we lost connection

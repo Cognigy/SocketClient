@@ -42,11 +42,23 @@ export interface Options {
 	testMode: boolean;
 
 	/**
-	 * If this is enabled, this`emitWithAck` parameter with be passed to socket connection.
-	 * And socket.io endpoint will emit messages with acknowledgement. This will be useful when event buffering feature is enabled
-	 * and network goes of, in lack of "acknowledgement" back to socket endpoint, message delivery is considered to be failed.
-	 * 
-	 * This is enabled by default and only used when "event buffering feature is enabled".
+	 * Governs acknowledgements in BOTH directions of the connection.
+	 * Disabling this flag turns off both behaviors described below.
+	 *
+	 * - Server -> client: tells the endpoint that this client will ack
+	 *   its outbound "output"/"finalPing" events. The endpoint uses this
+	 *   to know whether to expect an ack, so it can consider delivery to
+	 *   the client failed if one doesn't arrive in time.
+	 *
+	 * - Client -> server: `sendMessage` waits for the endpoint to
+	 *   acknowledge each message before considering it delivered. If the
+	 *   connection drops before the acknowledgement arrives - and this
+	 *   endpoint has previously been confirmed to ack messages at all -
+	 *   the message is re-buffered and resent on the next successful
+	 *   reconnect, instead of being silently lost while the UI already
+	 *   shows it as sent.
+	 *
+	 * Enabled by default.
 	 */
 	emitWithAck: boolean;
 };
